@@ -1,26 +1,39 @@
-import Base from '../Base';
-import * as Types from '../Types';
-import Collection from '../Collection';
-import Client, { ClientEvents } from './Client';
-export declare class RequestHandler extends Base {
-    protected client: Client;
-    events: Collection<string, Function[]>;
-    baseURL: string;
-    cache: {
-        gateway?: Types._JSONGateway | Types._JSONGatewayBot;
-    };
-    constructor(client: Client);
-    request(params: {
-        method: Types._JSONHTTPMethods;
-        url: string;
-        body?: {
-            [key: string]: unknown;
-            reason?: string;
-        };
-        file?: Types.FileContents | Types.FileContents[];
-    }): Promise<any>;
-    connect(): Promise<void>;
-    say<E extends keyof ClientEvents>(event: E, ...args: ClientEvents[E]): this;
-    listen<E extends keyof ClientEvents>(event: E, listener: (...args: ClientEvents[E]) => void): this;
-    forget(event: string): this;
+import Base from '../dev/Base';
+import Collection from '../dev/Collection';
+import type { KeyValueParse, UnknownObject } from '../dev/Types';
+import type Client from './Client';
+import type { FileContents, JSONGateway, JSONGatewayBot } from './Client';
+import EventHandler from './EventHandler';
+import type { ClientEvents } from './EventHandler';
+declare class Emitter extends Base {
+  protected events: Collection<ClientEvent['key'], Function[]>;
+  constructor();
+  say<E extends ClientEvent['key']>(event: E, ...args: ClientEvents[E]): this;
+  listen<E extends ClientEvent['key']>(event: E, listener: (...args: ClientEvents[E]) => void): this;
+  forget(event: ClientEvent['key']): this;
 }
+declare type HTTPMethod = 'GET' | 'PATCH' | 'POST' | 'PUT' | 'DELETE';
+declare type ClientEvent = KeyValueParse<ClientEvents>;
+interface ReasonObject {
+  reason?: string;
+}
+interface RequestParams {
+  method: HTTPMethod;
+  url: string;
+  body?: UnknownObject & ReasonObject;
+  file?: FileContents | FileContents[];
+}
+interface RequestHandler {
+  baseURL: string;
+  cache: {
+    gateway?: JSONGateway | JSONGatewayBot;
+  };
+  shards: Collection<number, EventHandler>;
+}
+declare class RequestHandler extends Emitter {
+  protected client: Client;
+  constructor(client: Client);
+  request(params: RequestParams): Promise<unknown>;
+  connect(): Promise<void>;
+}
+export default RequestHandler;
