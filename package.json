@@ -1,0 +1,16 @@
+{
+  "name": "discript",
+  "version": "1.0.0",
+  "author": "dataleaky",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/dataleaky/discript",
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "ws": "^7.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.13",
+    "@types/node-fetch": "^2.5.7",
+    "@types/ws": "^7.4.0"
+  }
+}
