@@ -13,5 +13,23 @@
     "@types/node-fetch": "^2.5.7",
     "@types/ws": "^7.4.0"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "description": "Much has not been done. Don't even try...",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dataleaky/disript.git"
+  },
+  "keywords": [
+    "discord-api"
+  ],
+  "bugs": {
+    "url": "https://github.com/dataleaky/disript/issues"
+  }
 }
