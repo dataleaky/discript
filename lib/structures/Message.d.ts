@@ -117,7 +117,7 @@ interface Message extends Base {
 declare class Message extends Base {
     protected client: ClientObject['client'];
     get date(): Date;
-    get editedDate(): Date | null;
+    get editedDate(): number | Date;
     constructor(data: ClientObject & JSONMessage);
     getType(): MessageType['value'] | null;
     getFlags(): MessageFlag['value'][] | null;
