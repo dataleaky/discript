@@ -8,26 +8,39 @@ import Channel, { FollowedChannel } from '../structures/Channel';
 import Invite from '../structures/Invite';
 import Message, { AllowedMentions, JSONEmbed } from '../structures/Message';
 import type Permission from '../structures/Permission';
-import type { JSONActivity, StatusTypes } from '../structures/Presence';
 import Server, { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, Template, WidgetStyle } from '../structures/Server';
 import User from '../structures/User';
 import Webhook from '../structures/Webhook';
 import RequestHandler from './RequestHandler';
-interface FileContents {
-}
+import type { StatusUpdate } from './EventHandler';
+import type { FileContents } from './RequestHandler';
 interface JSONGateway {
     url: string;
-}
-interface JSONGatewayBot {
-    url: string;
     shards: number;
-    sessionStartLimit: JSONSessionStartLimit;
+    session_start_limit: JSONSessionStartLimit;
+}
+interface Gateway {
+    url: string;
+    shards?: number;
+    sessionStartLimit?: SessionStartLimit;
+}
+declare class Gateway extends Base {
+    constructor(data: JSONGateway);
 }
 interface JSONSessionStartLimit {
     total: number;
     remaining: number;
     reset_after: number;
     max_concurrency: number;
+}
+interface SessionStartLimit {
+    total: number;
+    remaining: number;
+    resetAfter: number;
+    maxConcurrency: number;
+}
+declare class SessionStartLimit extends Base {
+    constructor(data: JSONSessionStartLimit);
 }
 interface ClientOptions {
     token: string;
@@ -50,12 +63,6 @@ interface ConnectionProperties {
     $browser: string;
     $device: string;
 }
-interface StatusUpdate {
-    since: number | null;
-    activities: JSONActivity[] | null;
-    status: StatusTypes;
-    afk: boolean;
-}
 interface DefaultURLs {
     base: string;
     cdn: string;
@@ -76,7 +83,7 @@ interface DefaultEndpoints {
     CDNTeamIcon(id: string, icon: string, format: ImageFormat): string;
     Gateway(): string;
     GatewayBot(): string;
-    GuildAuditLog(serverID: string): string;
+    ServerAuditLog(serverID: string): string;
 }
 interface Client {
     options: ClientOptions;
@@ -152,8 +159,8 @@ declare class Client extends Base {
         format?: ImageFormat;
         size?: ImageSize;
     }): string;
-    getGateway(): Promise<JSONGateway>;
-    getGatewayBot(): Promise<JSONGatewayBot>;
+    getGateway(): Promise<Gateway>;
+    getGatewayBot(): Promise<Gateway>;
     getApplicationInformation(options: {
         userID?: string;
     }): Promise<Application>;
@@ -331,11 +338,11 @@ declare class Client extends Base {
         serverID: string;
     }): Promise<Collection<unknown, unknown>>;
     getServerEmoji(options: {
-        guildID: string;
+        serverID: string;
         emojiID: string;
     }): Promise<Emoji>;
     createServerEmoji(options: {
-        guildID: string;
+        serverID: string;
         options: {
             name: string;
             image: string;
@@ -344,7 +351,7 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<Emoji>;
     updateServerEmoji(options: {
-        guildID: string;
+        serverID: string;
         emojiID: string;
         options: {
             name?: string;
@@ -353,7 +360,7 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<Emoji>;
     deleteServerEmoji(options: {
-        guildID: string;
+        serverID: string;
         emojiID: string;
         reason?: string;
     }): Promise<void>;
@@ -373,16 +380,16 @@ declare class Client extends Base {
         };
     }): Promise<Server>;
     getServer(options: {
-        guildID: string;
+        serverID: string;
         options: {
             withCounts?: boolean;
         };
     }): Promise<Server>;
     getServerPreview(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<ServerPreview>;
     updateServer(options: {
-        guildID: string;
+        serverID: string;
         options: {
             name?: string;
             region?: string | null;
@@ -403,13 +410,13 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<Server>;
     deleteServer(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<void>;
     getServerChannels(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<Collection<unknown, unknown>>;
     createServerChannel(options: {
-        guildID: string;
+        serverID: string;
         options: {
             name: string;
             type?: number;
@@ -425,25 +432,25 @@ declare class Client extends Base {
         reason: string;
     }): Promise<Channel>;
     updateServerChannelPositions(options: {
-        guildID: string;
+        serverID: string;
         options: {
             id: string;
             position: number | null;
         };
     }): Promise<void>;
     getServerMember(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
     }): Promise<ServerMember>;
     getServerMembers(options: {
-        guildID: string;
+        serverID: string;
         options: {
             after?: string;
             limit?: number;
         };
     }): Promise<Collection<unknown, unknown>>;
     createServerMember(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         options: {
             accessToken: string;
@@ -454,7 +461,7 @@ declare class Client extends Base {
         };
     }): Promise<ServerMember>;
     updateServerMember(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         options: {
             nick?: number;
@@ -466,38 +473,38 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<void>;
     updateUserNick(options: {
-        guildID: string;
+        serverID: string;
         userID?: string;
         options: {
             nick?: string | null;
         };
     }): Promise<void>;
     createServerMemberRole(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         roleID: string;
         reason?: string;
     }): Promise<void>;
     deleteServerMemberRole(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         roleID: string;
         reason?: string;
     }): Promise<void>;
     deleteServerMember(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         reason?: string;
     }): Promise<void>;
     getServerBans(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<Collection<unknown, unknown>>;
     getServerBan(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
     }): Promise<Ban>;
     createServerBan(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         options: {
             deleteMessageDays?: number;
@@ -505,15 +512,15 @@ declare class Client extends Base {
         };
     }): Promise<void>;
     deleteServerBan(options: {
-        guildID: string;
+        serverID: string;
         userID: string;
         reason?: string;
     }): Promise<void>;
     getServerRoles(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<Collection<unknown, unknown>>;
     createServerRole(options: {
-        guildID: string;
+        serverID: string;
         options: {
             name?: string;
             permissions?: string;
@@ -524,14 +531,14 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<Role>;
     updateServerRolePositions(options: {
-        guildID: string;
+        serverID: string;
         options: {
             id: string;
             position?: number | null;
         };
     }): Promise<Collection<unknown, unknown>>;
     updateServerRole(options: {
-        guildID: string;
+        serverID: string;
         roleID: string;
         options: {
             name?: string;
@@ -543,19 +550,19 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<Role>;
     deleteServerRole(options: {
-        guildID: string;
+        serverID: string;
         roleID: string;
         reason?: string;
     }): Promise<void>;
     getServerPruneCount(options: {
-        guildID: string;
+        serverID: string;
         options: {
             days?: number;
             includeRoles?: string[];
         };
     }): Promise<void>;
     beginServerPrune(options: {
-        guildID: string;
+        serverID: string;
         options: {
             days?: number;
             computePruneCount?: boolean;
@@ -564,19 +571,19 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<void>;
     getServerVoiceRegions(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<Collection<unknown, unknown>>;
     getServerInvites(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<Collection<unknown, unknown>>;
     getServerIntegrations(options: {
-        guildID: string;
+        serverID: string;
         options: {
             includeApplications?: boolean;
         };
     }): Promise<Collection<unknown, unknown>>;
     createServerIntegration(options: {
-        guildID: string;
+        serverID: string;
         options: {
             type: string;
             id: string;
@@ -584,7 +591,7 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<void>;
     updateServerIntegration(options: {
-        guildID: string;
+        serverID: string;
         integrationID: string;
         options: {
             expireBehavior?: number;
@@ -594,29 +601,29 @@ declare class Client extends Base {
         reason?: string;
     }): Promise<void>;
     deleteServerIntegration(options: {
-        guildID: string;
+        serverID: string;
         integrationID: string;
         reason?: string;
     }): Promise<void>;
     syncServerIntegration(options: {
-        guildID: string;
+        serverID: string;
         integrationID: string;
     }): Promise<void>;
     getServerWidgetSettings(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<ServerWidget>;
     updateServerWidget(options: {
-        guildID: string;
+        serverID: string;
         options?: string;
     }): Promise<ServerWidget>;
     getServerWidget(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<void>;
     getServerVanityURL(options: {
-        guildID: string;
+        serverID: string;
     }): Promise<PartialObject<Invite>>;
     getServerWidgetImage(options: {
-        guildID: string;
+        serverID: string;
         options: {
             style?: WidgetStyle;
         };
@@ -661,7 +668,7 @@ declare class Client extends Base {
         };
     }): Promise<Collection<bigint, PartialObject<Server>>>;
     leaveServer(options: {
-        guildID: string;
+        serverID: string;
         userID?: string;
     }): Promise<void>;
     getDMs(options: {
@@ -735,4 +742,4 @@ declare class Client extends Base {
     }): Promise<void>;
 }
 export default Client;
-export type { FileContents, JSONGateway, JSONGatewayBot };
+export type { Gateway };

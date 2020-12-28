@@ -2,9 +2,16 @@ import Base from '../Base';
 import Collection from '../Collection';
 import type { KeyValueParse, UnknownObject } from '../Types';
 import type Client from './Client';
-import type { FileContents, JSONGateway, JSONGatewayBot } from './Client';
+import type { Gateway } from './Client';
 import EventHandler from './EventHandler';
 import type { ClientEvents } from './EventHandler';
+declare const PackageData: {
+    name: string;
+    version: string;
+    homepage: string;
+};
+interface FileContents {
+}
 declare class Emitter extends Base {
     protected events: Collection<ClientEvent['key'], Function[]>;
     constructor();
@@ -25,7 +32,7 @@ interface RequestParams {
 }
 interface RequestHandler {
     cache: {
-        gateway?: JSONGateway | JSONGatewayBot;
+        gateway?: Gateway;
     };
     shards: Collection<number, EventHandler>;
 }
@@ -36,3 +43,5 @@ declare class RequestHandler extends Emitter {
     connect(): Promise<void>;
 }
 export default RequestHandler;
+export { PackageData };
+export type { FileContents };

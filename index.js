@@ -1,2 +1,1 @@
-const Client = require('./lib/client/Client').default;
-module.exports = Client;
+exports = require('./lib/client/Client').default;

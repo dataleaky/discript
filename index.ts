@@ -1,2 +1,2 @@
-import Client from './lib/client/Client';
-export { Client };
+import Client from './lib/client/Client'
+export = Client;

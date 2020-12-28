@@ -9,6 +9,5 @@ declare class Flake extends Base {
     get internalWorkerID(): number;
     get createdTime(): number;
     get createdDate(): Date;
-    toJSON(): string;
 }
 export default Flake;

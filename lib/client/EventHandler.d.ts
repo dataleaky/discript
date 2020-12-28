@@ -3,6 +3,7 @@ import Base from '../Base';
 import type { KeyValueParse } from '../Types';
 import Channel from '../structures/Channel';
 import Message from '../structures/Message';
+import type { JSONActivity, StatusTypes } from '../structures/Presence';
 import Server from '../structures/Server';
 import type Client from './Client';
 import * as WebSocket from 'ws';
@@ -20,6 +21,12 @@ declare const GatewayOpcodes: {
     11: string;
 };
 declare type GatewayOpcode = KeyValueParse<(typeof GatewayOpcodes)>;
+interface StatusUpdate {
+    since: number | null;
+    activities: JSONActivity[] | null;
+    status: StatusTypes;
+    afk: boolean;
+}
 interface ClientEvents {
     debug: [message: string];
     warning: [message: string];
@@ -77,4 +84,4 @@ declare class EventHandler extends Base {
     receive(payload: JSONPayload): void;
 }
 export default EventHandler;
-export type { ClientEvents };
+export type { ClientEvents, StatusUpdate };
