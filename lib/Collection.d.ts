@@ -1,5 +1,5 @@
 declare type WeakenMap = new <K, V>() => {
-    [P in Exclude<keyof Map<K, V>, 'set' | 'delete' | 'clear' | 'forEach'>]: Map<K, V>[P];
+    [P in Exclude<keyof Map<K, V>, 'clear' | 'set' | 'delete' | 'forEach' | 'entries' | 'get' | 'has' | 'keys' | 'values'>]: Map<K, V>[P];
 };
 declare const Collection_base: WeakenMap;
 declare class Collection<K, V> extends Collection_base<K, V> {
@@ -15,9 +15,14 @@ declare class Collection<K, V> extends Collection_base<K, V> {
         values: V[];
     };
     clear(): this;
-    delete(key: K): V | undefined;
     set(key: K, value: V, force?: boolean): V;
+    delete(key: K): V;
     forEach(callbackfn: (value: V, key: K, map: Collection<K, V>) => void, thisArg?: unknown): this;
+    entries(): IterableIterator<[K, V]>;
+    get(key: K): V;
+    has(key: K): boolean;
+    keys(): IterableIterator<K>;
+    values(): IterableIterator<V>;
     first(amount?: number): V | V[];
     last(amount?: number): V | V[];
     random(amount?: number): V | Collection<K, V> | undefined;

@@ -41,7 +41,8 @@ interface Presence {
     clientStatus: ClientStatus;
 }
 declare class Presence extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
+    get server(): import("./Server").default;
     constructor(data: ClientObject & JSONPresence);
 }
 interface JSONClientStatus {
@@ -90,8 +91,9 @@ interface Activity {
     flags?: number;
 }
 declare class Activity extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get createdDate(): Date;
+    get app(): import("./App").default | undefined;
     constructor(data: ClientObject & JSONActivity);
     getType(): ActivityType['value'] | null;
     getFlags(): ActivityFlag['value'][] | null;
@@ -120,7 +122,8 @@ interface ActivityEmoji {
     isAnimated?: boolean;
 }
 declare class ActivityEmoji extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
+    get emoji(): import("./Server").Emoji | undefined;
     constructor(data: ClientObject & JSONActivityEmoji);
     getEmojiURL(params: ImageParams): string | undefined;
 }
@@ -133,7 +136,9 @@ interface ActivityParty {
     size?: [number, number];
 }
 declare class ActivityParty extends Base {
-    constructor(data: JSONActivityParty);
+    protected _client: ClientObject['client'];
+    get app(): import("./App").default | undefined;
+    constructor(data: ClientObject & JSONActivityParty);
 }
 interface JSONActivityAssets {
     large_image?: string;
@@ -148,8 +153,8 @@ interface ActivityAssets {
     smallText?: string;
 }
 declare class ActivityAssets extends Base {
-    protected client: ClientObject['client'];
-    protected appFlake?: AppFlakeObject['appFlake'];
+    protected _client: ClientObject['client'];
+    protected _appFlake?: AppFlakeObject['appFlake'];
     constructor(data: ClientObject & JSONActivityAssets & AppFlakeObject);
     getLargeImageURL(params: ImageParams): string | undefined;
     getSmallImageURL(params: ImageParams): string | undefined;

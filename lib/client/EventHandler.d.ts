@@ -68,7 +68,7 @@ interface EventHandler {
     };
 }
 declare class EventHandler extends Base {
-    protected client: Client;
+    protected _client: Client;
     constructor({ client, id }: {
         client: Client;
         id: number;

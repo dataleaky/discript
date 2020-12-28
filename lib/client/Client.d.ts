@@ -1,10 +1,11 @@
 import Base from '../Base';
 import Collection from '../Collection';
 import type { DiscordLocales, ImageFormat, ImageSize, PartialObject } from '../Types';
-import Application from '../structures/Application';
+import App from '../structures/App';
 import AuditLog from '../structures/AuditLog';
 import type { AuditLogEvent } from '../structures/AuditLog';
 import Channel, { FollowedChannel } from '../structures/Channel';
+import Integration from '../structures/Integration';
 import Invite from '../structures/Invite';
 import Message, { AllowedMentions, JSONEmbed } from '../structures/Message';
 import type Permission from '../structures/Permission';
@@ -77,8 +78,8 @@ interface DefaultEndpoints {
     CDNServerBanner(id: string, banner: string, format: ImageFormat): string;
     CDNUserAvatarDefault(tag: string): string;
     CDNUserAvatar(id: string, avatar: string, format: ImageFormat): string;
-    CDNApplicationIcon(appID: string, icon: string, format: ImageFormat): string;
-    CDNApplicationAsset(appID: string, id: string, format: ImageFormat): string;
+    CDNAppIcon(appID: string, icon: string, format: ImageFormat): string;
+    CDNAppAsset(appID: string, id: string, format: ImageFormat): string;
     CDNAchievementIcon(appID: string, id: string, icon: string, format: ImageFormat): string;
     CDNTeamIcon(id: string, icon: string, format: ImageFormat): string;
     Gateway(): string;
@@ -93,6 +94,13 @@ interface Client {
     user: User;
     servers: Collection<bigint, Server>;
     channels: Collection<bigint, Channel>;
+    users: Collection<bigint, User>;
+    webhooks: Collection<bigint, Webhook>;
+    roles: Collection<bigint, Role>;
+    apps: Collection<bigint, App>;
+    integration: Collection<bigint, Integration>;
+    emojis: Collection<bigint, Emoji>;
+    messages: Collection<bigint, Emoji>;
 }
 declare class Client extends Base {
     constructor(options: PartialObject<ClientOptions>);
@@ -134,13 +142,13 @@ declare class Client extends Base {
         format?: ImageFormat;
         size?: ImageSize;
     }): string;
-    getApplicationIconURL(params: {
+    getAppIconURL(params: {
         appID: string;
         icon: string;
         format?: ImageFormat;
         size?: ImageSize;
     }): string;
-    getApplicationAssetURL(params: {
+    getAppAssetURL(params: {
         appID: string;
         id: string;
         format?: ImageFormat;
@@ -161,9 +169,9 @@ declare class Client extends Base {
     }): string;
     getGateway(): Promise<Gateway>;
     getGatewayBot(): Promise<Gateway>;
-    getApplicationInformation(options: {
+    getAppInformation(options: {
         userID?: string;
-    }): Promise<Application>;
+    }): Promise<App>;
     getAuditLog(params: {
         serverID: string;
         userID?: string;
@@ -579,7 +587,7 @@ declare class Client extends Base {
     getServerIntegrations(options: {
         serverID: string;
         options: {
-            includeApplications?: boolean;
+            includeApps?: boolean;
         };
     }): Promise<Collection<unknown, unknown>>;
     createServerIntegration(options: {

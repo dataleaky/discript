@@ -3,7 +3,7 @@ import Collection from '../Collection';
 import type { ClientObject, ImageParams, KeyValueParse, PartialObject } from '../Types';
 import type { ChannelType } from './Channel';
 import Flake from './Flake';
-import { Emoji, ServerMember } from './Server';
+import { Emoji, Role, ServerMember } from './Server';
 import type { JSONEmoji, JSONServerMember } from './Server';
 import User from './User';
 import type { JSONUser } from './User';
@@ -26,7 +26,7 @@ declare const MessageTypes: {
     readonly 14: "Server Discovery Disqualified";
     readonly 15: "Server Discovery Requalified";
     readonly 19: "Reply";
-    readonly 20: "Application Command";
+    readonly 20: "App Command";
 };
 declare const MessageFlags: {
     readonly 1: "Crossposted";
@@ -80,7 +80,7 @@ interface JSONMessage {
     webhook_id?: string;
     type: MessageType['key'];
     activity?: JSONMessageActivity;
-    application?: JSONMessageApplication;
+    application?: JSONMessageApp;
     message_reference?: JSONMessageReference;
     flags?: number;
     stickers?: JSONMessageSticker[];
@@ -98,7 +98,7 @@ interface Message extends Base {
     isTTS: boolean;
     isMentionEveryone: boolean;
     mentionUsers: Collection<bigint, User & MemberObject>;
-    mentionRoleFlakes: Flake[];
+    mentionRolesFlake: Flake[];
     mentionChannels?: Collection<bigint, ChannelMention>;
     attachments: Collection<bigint, Attachment>;
     embeds: Embed[];
@@ -108,16 +108,20 @@ interface Message extends Base {
     webhookFlake?: Flake;
     type: MessageType['key'];
     activity?: MessageActivity;
-    app?: MessageApplication;
+    app?: MessageApp;
     reference?: MessageReference;
     flags?: number;
     stickers?: Collection<bigint, MessageSticker>;
     replyMessage?: Message | null;
 }
 declare class Message extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get date(): Date;
     get editedDate(): number | Date;
+    get channel(): import("./Channel").default;
+    get server(): import("./Server").default | undefined;
+    get webhook(): Webhook | undefined;
+    get mentionRoles(): Collection<bigint, Role>;
     constructor(data: ClientObject & JSONMessage);
     getType(): MessageType['value'] | null;
     getFlags(): MessageFlag['value'][] | null;
@@ -131,26 +135,28 @@ interface MessageActivity {
     partyFlake?: Flake;
 }
 declare class MessageActivity extends Base {
-    constructor(data: JSONMessageActivity);
+    protected _client: ClientObject['client'];
+    get party(): import("./App").default | undefined;
+    constructor(data: ClientObject & JSONMessageActivity);
     getType(): MessageActivityType['value'] | null;
 }
-interface JSONMessageApplication {
+interface JSONMessageApp {
     id: string;
     cover_image?: string;
     description: string;
     icon: string | null;
     name: string;
 }
-interface MessageApplication extends Base {
+interface MessageApp extends Base {
     flake: Flake;
     coverImage?: string;
     description: string;
     icon: string | null;
     name: string;
 }
-declare class MessageApplication extends Base {
-    protected client: ClientObject['client'];
-    constructor(data: ClientObject & JSONMessageApplication);
+declare class MessageApp extends Base {
+    protected _client: ClientObject['client'];
+    constructor(data: ClientObject & JSONMessageApp);
     getIconURL(params: ImageParams): string | null;
     getAssetURL(params: ImageParams): string | null;
 }
@@ -202,7 +208,7 @@ interface Reaction {
     emoji: PartialObject<Emoji>;
 }
 declare class Reaction extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     constructor(data: ClientObject & JSONReaction);
 }
 interface JSONEmbed {
@@ -368,7 +374,10 @@ interface ChannelMention {
     name: string;
 }
 declare class ChannelMention extends Base {
-    constructor(data: JSONChannelMention);
+    protected _client: ClientObject['client'];
+    get channel(): import("./Channel").default;
+    get server(): import("./Server").default;
+    constructor(data: ClientObject & JSONChannelMention);
     getType(): ChannelType['value'] | null;
 }
 interface JSONAllowedMentions {

@@ -63,8 +63,8 @@ declare const AuditLogChangeKeys: {
     readonly explicit_content_filter: readonly ["explicitFilter", (element: ExplicitContentFilterLevel['key']) => 0 | 2 | 1];
     readonly default_message_notifications: readonly ["defaultNotifications", (element: DefaultMessageNotificationLevel['key']) => 0 | 1];
     readonly vanity_url_code: readonly ["vanityCode", (element: string) => string];
-    readonly $add: readonly ["add", (element: PartialObject<JSONRole>[]) => Collection<bigint, PartialObject<Role>>];
-    readonly $remove: readonly ["remove", (element: PartialObject<JSONRole>[]) => Collection<bigint, PartialObject<Role>>];
+    readonly $add: readonly ["add", (element: PartialObject<JSONRole>[], client: ClientObject['client']) => Collection<bigint, PartialObject<Role>>];
+    readonly $remove: readonly ["remove", (element: PartialObject<JSONRole>[], client: ClientObject['client']) => Collection<bigint, PartialObject<Role>>];
     readonly prune_delete_days: readonly ["days", (element: number) => number];
     readonly widget_enabled: readonly ["isWidget", (element: boolean) => boolean];
     readonly widget_channel_id: readonly ["widgetChannelFlake", (element: string) => Flake];
@@ -116,7 +116,7 @@ interface AuditLog {
     integrations: Collection<bigint, Integration>;
 }
 declare class AuditLog extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     constructor(data: ClientObject & JSONAuditLog);
 }
 interface JSONAuditLogEntry {
@@ -138,7 +138,8 @@ interface AuditLogEntry extends Base {
     reason?: string;
 }
 declare class AuditLogEntry extends Base {
-    constructor(data: JSONAuditLogEntry);
+    protected _client: ClientObject['client'];
+    constructor(data: ClientObject & JSONAuditLogEntry);
     getActionType(): AuditLogEvent['value'] | null;
 }
 interface JSONOptionalAuditEntryInfo {
@@ -176,7 +177,8 @@ interface AuditLogChange extends Base {
     key?: AuditLogChangeKey['value'][0];
 }
 declare class AuditLogChange extends Base {
-    constructor(data: JSONAuditLogChange);
+    protected _client: ClientObject['client'];
+    constructor(data: ClientObject & JSONAuditLogChange);
 }
 export default AuditLog;
 export type { AuditLogEvent, JSONAuditLog };

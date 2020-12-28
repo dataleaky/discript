@@ -9,7 +9,7 @@ declare const MembershipStateTypes: {
     readonly 2: "Accepted";
 };
 declare type MembershipStateType = KeyValueParse<(typeof MembershipStateTypes)>;
-interface JSONApplication {
+interface JSONApp {
     id: string;
     name: string;
     icon: string | null;
@@ -27,7 +27,7 @@ interface JSONApplication {
     cover_image?: string;
     flags: number;
 }
-interface Application {
+interface App {
     flake: Flake;
     name: string;
     icon: string | null;
@@ -45,9 +45,10 @@ interface Application {
     coverImage?: string;
     flags: number;
 }
-declare class Application extends Base {
-    protected client: ClientObject['client'];
-    constructor(data: ClientObject & JSONApplication);
+declare class App extends Base {
+    protected _client: ClientObject['client'];
+    get server(): import("./Server").default | undefined;
+    constructor(data: ClientObject & JSONApp);
     getIconURL(params: ImageParams): string | null;
 }
 interface JSONTeam {
@@ -63,7 +64,8 @@ interface Team {
     ownerFlake: Flake;
 }
 declare class Team extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
+    get owner(): User;
     constructor(data: ClientObject & JSONTeam);
     getIconURL(params: ImageParams): string | null;
 }
@@ -80,9 +82,10 @@ interface TeamMember {
     user: PartialObject<User>;
 }
 declare class TeamMember extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
+    get team(): App;
     constructor(data: ClientObject & JSONTeamMember);
     getMembershipState(): MembershipStateType['value'] | null;
 }
-export default Application;
-export type { JSONApplication };
+export default App;
+export type { JSONApp };

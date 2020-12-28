@@ -54,7 +54,7 @@ interface User {
     premiumType?: PremiumType['key'];
 }
 declare class User extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get mention(): string;
     get fullName(): string;
     constructor(data: ClientObject & JSONUser);

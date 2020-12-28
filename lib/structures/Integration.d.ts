@@ -29,7 +29,7 @@ interface JSONIntegration {
     synced_at?: string;
     subscriber_count?: number;
     revoked?: boolean;
-    application?: JSONIntegrationApplication;
+    application?: JSONIntegrationApp;
 }
 interface Integration {
     flake: Flake;
@@ -46,11 +46,12 @@ interface Integration {
     syncedTime?: number;
     subscriberСount?: number;
     isRevoked?: boolean;
-    app?: IntegrationApplication;
+    app?: IntegrationApp;
 }
 declare class Integration extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get syncedDate(): Date | undefined;
+    get role(): import("./Server").Role | undefined;
     constructor(data: ClientObject & JSONIntegration);
     getExpireBehavior(): IntegrationExpireBehavior['value'] | null;
 }
@@ -63,9 +64,11 @@ interface IntegrationAccount {
     name: string;
 }
 declare class IntegrationAccount extends Base {
-    constructor(data: JSONIntegrationAccount);
+    protected _client: ClientObject['client'];
+    get user(): User;
+    constructor(data: ClientObject & JSONIntegrationAccount);
 }
-interface JSONIntegrationApplication {
+interface JSONIntegrationApp {
     id: string;
     name: string;
     icon: string | null;
@@ -73,7 +76,7 @@ interface JSONIntegrationApplication {
     summary: string;
     bot?: JSONUser;
 }
-interface IntegrationApplication {
+interface IntegrationApp {
     flake: Flake;
     name: string;
     icon: string | null;
@@ -81,9 +84,10 @@ interface IntegrationApplication {
     summary: string;
     bot?: User;
 }
-declare class IntegrationApplication extends Base {
-    protected client: ClientObject['client'];
-    constructor(data: ClientObject & JSONIntegrationApplication);
+declare class IntegrationApp extends Base {
+    protected _client: ClientObject['client'];
+    get app(): import("./App").default;
+    constructor(data: ClientObject & JSONIntegrationApp);
     getIconURL(params: ImageParams): string | null;
 }
 interface JSONConnection {
@@ -109,7 +113,8 @@ interface Connection {
     visibilityType: VisibilityType['key'];
 }
 declare class Connection extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
+    get user(): User;
     constructor(data: ClientObject & JSONConnection);
     getVisibilityType(): VisibilityType['value'] | null;
 }

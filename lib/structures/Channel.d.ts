@@ -57,9 +57,14 @@ interface Channel {
     lastPinTime?: number | null;
 }
 declare class Channel extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get mention(): string;
     get lastPinDate(): Date | null | undefined;
+    get server(): import("./Server").default | undefined;
+    get lastMessage(): import("./Server").Emoji | null | undefined;
+    get owner(): User | undefined;
+    get app(): import("./App").default | undefined;
+    get parent(): Channel | null | undefined;
     constructor(data: ClientObject & JSONChannel);
     getType(): "Server Text" | "DM" | "Server Voice" | "Group DM" | "Server Category" | "Server News" | "Server Store" | null;
 }
@@ -72,7 +77,10 @@ interface FollowedChannel {
     webhookFlake: Flake;
 }
 declare class FollowedChannel extends Base {
-    constructor(data: JSONFollowedChannel);
+    protected _client: ClientObject['client'];
+    get channel(): Channel;
+    get webhook(): import("./Webhook").default;
+    constructor(data: ClientObject & JSONFollowedChannel);
 }
 export default Channel;
 export { ChannelTypes, FollowedChannel };

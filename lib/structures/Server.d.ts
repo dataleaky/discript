@@ -116,7 +116,7 @@ interface Server {
     emojis: Collection<bigint, Emoji>;
     features: ServerFeature[];
     mfaLevel: MFALevel['key'];
-    applicationFlake: Flake | null;
+    appFlake: Flake | null;
     systemChannelFlake: Flake | null;
     systemChannelFlags: number;
     rulesChannelFlake: Flake | null;
@@ -142,8 +142,15 @@ interface Server {
     roughPresenceCount?: number;
 }
 declare class Server extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get joinedDate(): Date | undefined;
+    get owner(): User;
+    get afkChannel(): Channel | null;
+    get widgetChannel(): Channel | null | undefined;
+    get app(): import("./App").default | null;
+    get systemChannel(): Channel | null;
+    get rulesChannel(): Channel | null;
+    get publicUpdatesChannel(): Channel | null;
     constructor(data: ClientObject & JSONServer);
     getDefaultMessageNotifications(): DefaultMessageNotificationLevel['value'] | null;
     getExplicitContentFilter(): ExplicitContentFilterLevel['value'] | null;
@@ -181,7 +188,7 @@ interface ServerPreview {
     description: string | null;
 }
 declare class ServerPreview extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     constructor(data: ClientObject & JSONServerPreview);
     getIconURL(params: ImageParams): string | null;
     getSplashURL(params: ImageParams): string | null;
@@ -210,8 +217,9 @@ interface Role {
     tags?: RoleTags;
 }
 declare class Role extends Base {
+    protected _client: ClientObject['client'];
     get mention(): string;
-    constructor(data: JSONRole);
+    constructor(data: ClientObject & JSONRole);
 }
 interface JSONRoleTags {
     bot_id?: string;
@@ -224,7 +232,10 @@ interface RoleTags {
     isPremiumSubscriber?: null;
 }
 declare class RoleTags extends Base {
-    constructor(data: JSONRoleTags);
+    protected _client: ClientObject['client'];
+    get bot(): import("./App").default | undefined;
+    get integration(): import("./Integration").default | undefined;
+    constructor(data: ClientObject & JSONRoleTags);
 }
 interface JSONEmoji {
     id: string | null;
@@ -239,7 +250,7 @@ interface JSONEmoji {
 interface Emoji {
     flake: Flake | null;
     name: string | null;
-    roleFlakes?: Flake[];
+    rolesFlake?: Flake[];
     user?: User;
     isWrapped?: boolean;
     isManaged?: boolean;
@@ -247,8 +258,9 @@ interface Emoji {
     isAvailable?: boolean;
 }
 declare class Emoji extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get emojiName(): string | null;
+    get roles(): Collection<bigint, Role> | undefined;
     constructor(data: ClientObject & JSONEmoji);
     getEmojiURL(params: ImageParams): string | null;
 }
@@ -266,17 +278,18 @@ interface ServerMember {
     user?: User;
     nick: string | null;
     joinedTime: number;
-    roleFlakes: Flake[];
+    rolesFlake: Flake[];
     premiumTime?: number | null;
     isDeaf: boolean;
     isMute: boolean;
     isPending?: boolean;
 }
 declare class ServerMember extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get mention(): string | undefined;
     get joinedDate(): Date;
     get premiumDate(): Date | null | undefined;
+    get roles(): Collection<bigint, Role>;
     constructor(data: ClientObject & JSONServerMember);
 }
 interface JSONBan {
@@ -288,7 +301,7 @@ interface Ban {
     user: User;
 }
 declare class Ban extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     constructor(data: ClientObject & JSONBan);
 }
 interface JSONVoiceState {
@@ -320,7 +333,10 @@ interface VoiceState {
     isSuppress: boolean;
 }
 declare class VoiceState extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
+    get server(): Server | undefined;
+    get channel(): Channel | null;
+    get user(): User;
     constructor(data: ClientObject & JSONVoiceState);
 }
 interface JSONVoiceRegion {
@@ -351,7 +367,9 @@ interface ServerWidget {
     channelFlake: Flake | null;
 }
 declare class ServerWidget extends Base {
-    constructor(data: JSONServerWidget);
+    protected _client: ClientObject['client'];
+    get channel(): Channel | null;
+    constructor(data: ClientObject & JSONServerWidget);
 }
 interface JSONTemplate {
     code: string;
@@ -372,7 +390,7 @@ interface Template {
     description: string | null;
     usageCount: number;
     creatorFlake: Flake;
-    creator: User;
+    creatorUser: User;
     createdTime: number;
     updatedTime: number;
     serverFlake: Flake;
@@ -380,9 +398,11 @@ interface Template {
     isDirty: boolean | null;
 }
 declare class Template extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['client'];
     get createdDate(): Date;
     get updatedDate(): Date;
+    get creator(): User;
+    get server(): Server;
     constructor(data: ClientObject & JSONTemplate);
 }
 export default Server;

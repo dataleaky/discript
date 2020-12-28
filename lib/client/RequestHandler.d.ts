@@ -13,7 +13,7 @@ declare const PackageData: {
 interface FileContents {
 }
 declare class Emitter extends Base {
-    protected events: Collection<ClientEvent['key'], Function[]>;
+    protected _events: Collection<ClientEvent['key'], Function[]>;
     constructor();
     say<E extends ClientEvent['key']>(event: E, ...args: ClientEvents[E]): this;
     listen<E extends ClientEvent['key']>(event: E, listener: (...args: ClientEvents[E]) => void): this;
@@ -37,7 +37,7 @@ interface RequestHandler {
     shards: Collection<number, EventHandler>;
 }
 declare class RequestHandler extends Emitter {
-    protected client: Client;
+    protected _client: Client;
     constructor(client: Client);
     request(params: RequestParams): Promise<unknown>;
     connect(): Promise<void>;
