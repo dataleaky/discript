@@ -39,7 +39,7 @@ declare const SystemChannelFlags: {
     readonly 1: "Suppress Join Notifications";
     readonly 2: "Suppress Premium Subscriptions";
 };
-declare type DefaultMessageNotificationLevel = KeyValueParse<(typeof DefaultMessageNotificationLevels)>;
+declare type MessageNotificationLevel = KeyValueParse<(typeof DefaultMessageNotificationLevels)>;
 declare type ExplicitContentFilterLevel = KeyValueParse<(typeof ExplicitContentFilterLevels)>;
 declare type MFALevel = KeyValueParse<(typeof MFALevels)>;
 declare type VerificationLevel = KeyValueParse<(typeof VerificationLevels)>;
@@ -63,7 +63,7 @@ interface JSONServer {
     widget_enabled?: boolean;
     widget_channel_id?: string | null;
     verification_level: VerificationLevel['key'];
-    default_message_notifications: DefaultMessageNotificationLevel['key'];
+    default_message_notifications: MessageNotificationLevel['key'];
     explicit_content_filter: ExplicitContentFilterLevel['key'];
     roles: JSONRole[];
     emojis: JSONEmoji[];
@@ -110,7 +110,7 @@ interface Server {
     isWidget?: boolean;
     widgetChannelFlake?: Flake | null;
     verificationLevel: VerificationLevel['key'];
-    defaultNotifications: DefaultMessageNotificationLevel['key'];
+    messageNotifications: MessageNotificationLevel['key'];
     explicitFilter: ExplicitContentFilterLevel['key'];
     roles: Collection<bigint, Role>;
     emojis: Collection<bigint, Emoji>;
@@ -142,7 +142,7 @@ interface Server {
     roughPresenceCount?: number;
 }
 declare class Server extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get joinedDate(): Date | undefined;
     get owner(): User;
     get afkChannel(): Channel | null;
@@ -152,7 +152,7 @@ declare class Server extends Base {
     get rulesChannel(): Channel | null;
     get publicUpdatesChannel(): Channel | null;
     constructor(data: ClientObject & JSONServer);
-    getDefaultMessageNotifications(): DefaultMessageNotificationLevel['value'] | null;
+    getDefaultMessageNotifications(): MessageNotificationLevel['value'] | null;
     getExplicitContentFilter(): ExplicitContentFilterLevel['value'] | null;
     getMFALevel(): MFALevel['value'] | null;
     getVerificationLevel(): VerificationLevel['value'] | null;
@@ -188,7 +188,7 @@ interface ServerPreview {
     description: string | null;
 }
 declare class ServerPreview extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONServerPreview);
     getIconURL(params: ImageParams): string | null;
     getSplashURL(params: ImageParams): string | null;
@@ -217,7 +217,7 @@ interface Role {
     tags?: RoleTags;
 }
 declare class Role extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get mention(): string;
     constructor(data: ClientObject & JSONRole);
 }
@@ -232,7 +232,7 @@ interface RoleTags {
     isPremiumSubscriber?: null;
 }
 declare class RoleTags extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get bot(): import("./App").default | undefined;
     get integration(): import("./Integration").default | undefined;
     constructor(data: ClientObject & JSONRoleTags);
@@ -258,7 +258,7 @@ interface Emoji {
     isAvailable?: boolean;
 }
 declare class Emoji extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get emojiName(): string | null;
     get roles(): Collection<bigint, Role> | undefined;
     constructor(data: ClientObject & JSONEmoji);
@@ -273,6 +273,7 @@ interface JSONServerMember {
     deaf: boolean;
     mute: boolean;
     pending?: boolean;
+    permissions?: string;
 }
 interface ServerMember {
     user?: User;
@@ -283,9 +284,10 @@ interface ServerMember {
     isDeaf: boolean;
     isMute: boolean;
     isPending?: boolean;
+    bitPermission?: BitSet;
 }
 declare class ServerMember extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get mention(): string | undefined;
     get joinedDate(): Date;
     get premiumDate(): Date | null | undefined;
@@ -301,7 +303,7 @@ interface Ban {
     user: User;
 }
 declare class Ban extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONBan);
 }
 interface JSONVoiceState {
@@ -333,7 +335,7 @@ interface VoiceState {
     isSuppress: boolean;
 }
 declare class VoiceState extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get server(): Server | undefined;
     get channel(): Channel | null;
     get user(): User;
@@ -367,9 +369,19 @@ interface ServerWidget {
     channelFlake: Flake | null;
 }
 declare class ServerWidget extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get channel(): Channel | null;
     constructor(data: ClientObject & JSONServerWidget);
+}
+interface JSONServerWidgetParams {
+    [key: string]: unknown;
+}
+interface ServerWidgetParams {
+    [key: string]: unknown;
+}
+declare class ServerWidgetParams extends Base {
+    protected _client: ClientObject['_client'];
+    constructor(data: ClientObject & JSONServerWidgetParams);
 }
 interface JSONTemplate {
     code: string;
@@ -398,7 +410,7 @@ interface Template {
     isDirty: boolean | null;
 }
 declare class Template extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get createdDate(): Date;
     get updatedDate(): Date;
     get creator(): User;
@@ -406,5 +418,5 @@ declare class Template extends Base {
     constructor(data: ClientObject & JSONTemplate);
 }
 export default Server;
-export { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, Template, VoiceRegion };
-export type { DefaultMessageNotificationLevel, ExplicitContentFilterLevel, JSONBan, JSONEmoji, JSONRole, JSONServer, JSONServerMember, JSONServerPreview, JSONServerWidget, JSONTemplate, JSONVoiceRegion, MFALevel, VerificationLevel, WidgetStyle };
+export { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, ServerWidgetParams, Template, VoiceRegion, VoiceState };
+export type { ExplicitContentFilterLevel, JSONBan, JSONEmoji, JSONRole, JSONServer, JSONServerMember, JSONServerPreview, JSONServerWidget, JSONServerWidgetParams, JSONTemplate, JSONVoiceRegion, JSONVoiceState, MessageNotificationLevel, MFALevel, VerificationLevel, WidgetStyle };

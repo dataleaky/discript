@@ -46,7 +46,7 @@ interface App {
     flags: number;
 }
 declare class App extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get server(): import("./Server").default | undefined;
     constructor(data: ClientObject & JSONApp);
     getIconURL(params: ImageParams): string | null;
@@ -64,7 +64,7 @@ interface Team {
     ownerFlake: Flake;
 }
 declare class Team extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get owner(): User;
     constructor(data: ClientObject & JSONTeam);
     getIconURL(params: ImageParams): string | null;
@@ -82,7 +82,7 @@ interface TeamMember {
     user: PartialObject<User>;
 }
 declare class TeamMember extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get team(): App;
     constructor(data: ClientObject & JSONTeamMember);
     getMembershipState(): MembershipStateType['value'] | null;

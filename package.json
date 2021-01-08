@@ -1,6 +1,6 @@
 {
   "name": "discript",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "dataleaky",
   "license": "Apache-2.0",
   "homepage": "https://github.com/dataleaky/discript",
@@ -14,14 +14,7 @@
     "@types/ws": "^7.4.0"
   },
   "main": "index.js",
-  "description": "Much has not been done. Don't even try...",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "description": "JS/TS library for working with Discord API ",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dataleaky/disript.git"

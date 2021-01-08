@@ -7,8 +7,6 @@ import { Emoji, Role, ServerMember } from './Server';
 import type { JSONEmoji, JSONServerMember } from './Server';
 import User from './User';
 import type { JSONUser } from './User';
-import Webhook from './Webhook';
-import type { JSONWebhook } from './Webhook';
 declare const MessageTypes: {
     readonly 0: "Default";
     readonly 1: "Recipient Add";
@@ -62,7 +60,7 @@ interface JSONMessage {
     id: string;
     channel_id: string;
     guild_id?: string;
-    author: JSONUser | PartialObject<JSONWebhook>;
+    author: JSONUser;
     member?: PartialObject<JSONServerMember>;
     content: string;
     timestamp: string;
@@ -90,7 +88,7 @@ interface Message extends Base {
     flake: Flake;
     channelFlake: Flake;
     serverFlake?: Flake;
-    author: User | PartialObject<Webhook>;
+    author: User;
     member?: PartialObject<ServerMember>;
     content: string;
     timestamp: number;
@@ -115,12 +113,12 @@ interface Message extends Base {
     replyMessage?: Message | null;
 }
 declare class Message extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get date(): Date;
     get editedDate(): number | Date;
     get channel(): import("./Channel").default;
     get server(): import("./Server").default | undefined;
-    get webhook(): Webhook | undefined;
+    get webhook(): import("./Webhook").default | undefined;
     get mentionRoles(): Collection<bigint, Role>;
     constructor(data: ClientObject & JSONMessage);
     getType(): MessageType['value'] | null;
@@ -135,7 +133,7 @@ interface MessageActivity {
     partyFlake?: Flake;
 }
 declare class MessageActivity extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get party(): import("./App").default | undefined;
     constructor(data: ClientObject & JSONMessageActivity);
     getType(): MessageActivityType['value'] | null;
@@ -155,7 +153,7 @@ interface MessageApp extends Base {
     name: string;
 }
 declare class MessageApp extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONMessageApp);
     getIconURL(params: ImageParams): string | null;
     getAssetURL(params: ImageParams): string | null;
@@ -208,7 +206,7 @@ interface Reaction {
     emoji: PartialObject<Emoji>;
 }
 declare class Reaction extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONReaction);
 }
 interface JSONEmbed {
@@ -216,7 +214,7 @@ interface JSONEmbed {
     type?: EmbedType;
     description?: string;
     url?: string;
-    timestamp?: string;
+    timestamp?: string | Date;
     color?: number;
     footer?: JSONEmbedFooter;
     image?: JSONEmbedImage;
@@ -262,11 +260,13 @@ declare class EmbedThumbnail extends Base {
 }
 interface JSONEmbedVideo {
     url?: string;
+    proxy_url?: string;
     height?: number;
     width?: number;
 }
 interface EmbedVideo {
     url?: string;
+    proxyURL?: string;
     height?: number;
     width?: number;
 }
@@ -374,7 +374,7 @@ interface ChannelMention {
     name: string;
 }
 declare class ChannelMention extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get channel(): import("./Channel").default;
     get server(): import("./Server").default;
     constructor(data: ClientObject & JSONChannelMention);
@@ -397,4 +397,4 @@ declare class AllowedMentions extends Base {
 }
 export default Message;
 export { AllowedMentions };
-export type { JSONEmbed, JSONMessage };
+export type { JSONAllowedMentions, JSONEmbed, JSONMessage };

@@ -57,7 +57,7 @@ interface Channel {
     lastPinTime?: number | null;
 }
 declare class Channel extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get mention(): string;
     get lastPinDate(): Date | null | undefined;
     get server(): import("./Server").default | undefined;
@@ -77,7 +77,7 @@ interface FollowedChannel {
     webhookFlake: Flake;
 }
 declare class FollowedChannel extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get channel(): Channel;
     get webhook(): import("./Webhook").default;
     constructor(data: ClientObject & JSONFollowedChannel);

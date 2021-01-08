@@ -5,16 +5,23 @@ import App from '../structures/App';
 import AuditLog from '../structures/AuditLog';
 import type { AuditLogEvent } from '../structures/AuditLog';
 import Channel, { FollowedChannel } from '../structures/Channel';
+import type { ChannelType, JSONChannel } from '../structures/Channel';
 import Integration from '../structures/Integration';
+import type { IntegrationExpireBehavior } from '../structures/Integration';
 import Invite from '../structures/Invite';
-import Message, { AllowedMentions, JSONEmbed } from '../structures/Message';
-import type Permission from '../structures/Permission';
-import Server, { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, Template, WidgetStyle } from '../structures/Server';
+import type { TargetUserType } from '../structures/Invite';
+import Message from '../structures/Message';
+import type { JSONEmbed } from '../structures/Message';
+import type { JSONAllowedMentions } from '../structures/Message';
+import type { JSONPermission, PermissionType } from '../structures/Permission';
+import Server, { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, ServerWidgetParams, Template, WidgetStyle } from '../structures/Server';
+import type { ExplicitContentFilterLevel, JSONRole, MessageNotificationLevel, VerificationLevel } from '../structures/Server';
 import User from '../structures/User';
 import Webhook from '../structures/Webhook';
+import type { EditPresence } from './EventHandler';
 import RequestHandler from './RequestHandler';
-import type { StatusUpdate } from './EventHandler';
-import type { FileContents } from './RequestHandler';
+import type { FileContents, ImageData } from './RequestHandler';
+declare type id = bigint | string | number;
 interface JSONGateway {
     url: string;
     shards: number;
@@ -48,14 +55,14 @@ interface ClientOptions {
     properties: ConnectionProperties;
     isCompress?: boolean;
     largeThreshold?: number;
-    shard: number | 'auto';
-    presence?: StatusUpdate;
+    numShards: number | 'auto';
+    presence?: EditPresence;
     isServerSubscriptions?: boolean;
     intents: number;
     defaultImageSize: ImageSize;
     defaultImageFormat: ImageFormat;
-    defaultURLs: DefaultURLs;
-    defaultEndpoints: DefaultEndpoints;
+    defaultURLs: typeof DefaultURLs;
+    defaultEndpoints: typeof DefaultEndpoints;
     userAgent: string;
     isDisableStrict: boolean;
 }
@@ -63,28 +70,6 @@ interface ConnectionProperties {
     $os: string;
     $browser: string;
     $device: string;
-}
-interface DefaultURLs {
-    base: string;
-    cdn: string;
-    invite: string;
-    template: string;
-}
-interface DefaultEndpoints {
-    CDNCustomEmoji(id: string, format: ImageFormat): string;
-    CDNServerIcon(id: string, icon: string, format: ImageFormat): string;
-    CDNServerSplash(id: string, splash: string, format: ImageFormat): string;
-    CDNServerDiscoverySplash(id: string, discoverySplash: string, format: ImageFormat): string;
-    CDNServerBanner(id: string, banner: string, format: ImageFormat): string;
-    CDNUserAvatarDefault(tag: string): string;
-    CDNUserAvatar(id: string, avatar: string, format: ImageFormat): string;
-    CDNAppIcon(appID: string, icon: string, format: ImageFormat): string;
-    CDNAppAsset(appID: string, id: string, format: ImageFormat): string;
-    CDNAchievementIcon(appID: string, id: string, icon: string, format: ImageFormat): string;
-    CDNTeamIcon(id: string, icon: string, format: ImageFormat): string;
-    Gateway(): string;
-    GatewayBot(): string;
-    ServerAuditLog(serverID: string): string;
 }
 interface Client {
     options: ClientOptions;
@@ -102,651 +87,668 @@ interface Client {
     emojis: Collection<bigint, Emoji>;
     messages: Collection<bigint, Emoji>;
 }
+declare const DefaultURLs: {
+    base: string;
+    cdn: string;
+    invite: string;
+    template: string;
+};
+declare const DefaultEndpoints: {
+    AppAsset: (cdn: string, appID: id, assetID: id, format: ImageFormat) => string;
+    AppAchievementIcon: (cdn: string, appID: id, achievementID: id, icon: string, format: ImageFormat) => string;
+    AppIcon: (cdn: string, appID: id, icon: string, format: ImageFormat) => string;
+    UserAvatar: (cdn: string, userID: id, avatar: string, format: ImageFormat) => string;
+    ServerBanner: (cdn: string, serverID: id, banner: string, format: ImageFormat) => string;
+    ServerDiscoverySplash: (cdn: string, serverID: id, discoverySplash: string, format: ImageFormat) => string;
+    DefaultUserAvatar: (cdn: string, tag: string) => string;
+    Emoji: (cdn: string, emojiID: id, format: ImageFormat) => string;
+    ServerIcon: (cdn: string, serverID: id, icon: string, format: ImageFormat) => string;
+    ServerSplash: (cdn: string, serverID: id, splash: string, format: ImageFormat) => string;
+    TeamIcon: (cdn: string, teamID: id, icon: string, format: ImageFormat) => string;
+    Channel: (base: string, channelID: id) => string;
+    ChannelMessages: (base: string, channelID: id) => string;
+    ChannelMessage: (base: string, channelID: id, messageID: id) => string;
+    ChannelMessagePublish: (base: string, channelID: id, messageID: id) => string;
+    ChannelMessageReactions: (base: string, channelID: id, messageID: id) => string;
+    ChannelMessageReaction: (base: string, channelID: id, messageID: id, emoji: string) => string;
+    ChannelMessageReactionUser: (base: string, channelID: id, messageID: id, emoji: string, userID: id) => string;
+    ChannelMessagesBulk: (base: string, channelID: id) => string;
+    ChannelInvites: (base: string, channelID: id) => string;
+    ChannelFollowers: (base: string, channelID: id) => string;
+    ChannelPermission: (base: string, channelID: id, overwriteID: id) => string;
+    ChannelPins: (base: string, channelID: id) => string;
+    ChannelPin: (base: string, channelID: id, messageID: id) => string;
+    ChannelRecipient: (base: string, channelID: id, userID: id) => string;
+    ChannelTyping: (base: string, channelID: id) => string;
+    ChannelWebhooks: (base: string, channelID: id) => string;
+    Gateway: (base: string) => string;
+    GatewayBot: (base: string) => string;
+    Servers: (base: string) => string;
+    Server: (base: string, serverID: id) => string;
+    ServerAuditLog: (base: string, serverID: id) => string;
+    ServerBans: (base: string, serverID: id) => string;
+    ServerBan: (base: string, serverID: id, userID: id) => string;
+    ServerChannels: (base: string, serverID: id) => string;
+    ServerEmojis: (base: string, serverID: id) => string;
+    ServerEmoji: (base: string, serverID: id, emojiID: id) => string;
+    ServerIntegrations: (base: string, serverID: id) => string;
+    ServerIntegration: (base: string, serverID: id, integrationID: id) => string;
+    ServerIntegrationSync: (base: string, serverID: id, integrationID: id) => string;
+    ServerInvites: (base: string, serverID: id) => string;
+    ServerMembers: (base: string, serverID: id) => string;
+    ServerMember: (base: string, serverID: id, userID: id) => string;
+    ServerMemberNick: (base: string, serverID: id, userID: id) => string;
+    ServerMemberRole: (base: string, serverID: id, userID: id, roleID: id) => string;
+    ServerPreview: (base: string, serverID: id) => string;
+    ServerPrune: (base: string, serverID: id) => string;
+    ServerRegions: (base: string, serverID: id) => string;
+    ServerRoles: (base: string, serverID: id) => string;
+    ServerRole: (base: string, serverID: id, roleID: id) => string;
+    ServerTemplates: (base: string, serverID: id) => string;
+    ServerTemplate: (base: string, serverID: id, templateCode: string) => string;
+    ServerInvite: (base: string, serverID: id) => string;
+    ServerWebhooks: (base: string, serverID: id) => string;
+    ServerWidget: (base: string, serverID: id) => string;
+    ServerWidgetParams: (base: string, serverID: id) => string;
+    ServerWidgetImage: (base: string, serverID: id) => string;
+    Invite: (base: string, inviteCode: string) => string;
+    OAuth2App: (base: string, userID: id) => string;
+    Template: (base: string, templateCode: string) => string;
+    User: (base: string, userID: id) => string;
+    UserChannels: (base: string, userID: id) => string;
+    UserConnections: (base: string, userID: id) => string;
+    UserServers: (base: string, userID: id) => string;
+    UserServer: (base: string, userID: id, serverID: id) => string;
+    VoiceRegions: (base: string) => string;
+    Webhook: (base: string, webhookID: id) => string;
+    WebhookToken: (base: string, webhookID: id, webhookToken: string) => string;
+    WebhookTokenGitHub: (base: string, webhookID: id, webhookToken: string) => string;
+    WebhookTokenSlack: (base: string, webhookID: id, webhookToken: string) => string;
+};
 declare class Client extends Base {
     constructor(options: PartialObject<ClientOptions>);
-    getCustomEmojiURL(params: {
-        id: string;
+    getAppAssetURL(params: {
+        appID: id;
+        assetID: id;
+        format?: ImageFormat;
+        size?: ImageSize;
+    }): string;
+    getAppAchievementIconURL(params: {
+        appID: id;
+        achievementID: id;
+        icon: string;
+        format?: ImageFormat;
+        size?: ImageSize;
+    }): string;
+    getAppIconURL(params: {
+        appID: id;
+        icon: string;
+        format?: ImageFormat;
+        size?: ImageSize;
+    }): string;
+    getUserAvatarURL(params: {
+        avatar: string;
+        userID: id;
+        format?: ImageFormat;
+        size?: ImageSize;
+    }): string;
+    getServerBannerURL(params: {
+        serverID: id;
+        banner: string;
+        format?: ImageFormat;
+        size?: ImageSize;
+    }): string;
+    getServerDiscoverySplashURL(params: {
+        serverID: id;
+        discoverySplash: string;
+        format?: ImageFormat;
+        size?: ImageSize;
+    }): string;
+    getDefaultUserAvatarURL(params: {
+        tag: string;
+    }): string;
+    getEmojiURL(params: {
+        emojiID: id;
         animated: boolean;
         size?: ImageSize;
     }): string;
     getServerIconURL(params: {
-        id: string;
+        serverID: id;
         icon: string;
         format?: ImageFormat;
         size?: ImageSize;
     }): string;
     getServerSplashURL(params: {
-        id: string;
+        serverID: id;
         splash: string;
         format?: ImageFormat;
         size?: ImageSize;
     }): string;
-    getServerDiscoverySplashURL(params: {
-        id: string;
-        discoverySplash: string;
-        format?: ImageFormat;
-        size?: ImageSize;
-    }): string;
-    getServerBannerURL(params: {
-        id: string;
-        banner: string;
-        format?: ImageFormat;
-        size?: ImageSize;
-    }): string;
-    getUserAvatarDefaultURL(params: {
-        tag: string;
-    }): string;
-    getUserAvatarURL(params: {
-        avatar: string;
-        id: string;
-        format?: ImageFormat;
-        size?: ImageSize;
-    }): string;
-    getAppIconURL(params: {
-        appID: string;
-        icon: string;
-        format?: ImageFormat;
-        size?: ImageSize;
-    }): string;
-    getAppAssetURL(params: {
-        appID: string;
-        id: string;
-        format?: ImageFormat;
-        size?: ImageSize;
-    }): string;
-    getAchievementIconURL(params: {
-        appID: string;
-        id: string;
-        icon: string;
-        format?: ImageFormat;
-        size?: ImageSize;
-    }): string;
     getTeamIconURL(params: {
-        id: string;
+        teamID: id;
         icon: string;
         format?: ImageFormat;
         size?: ImageSize;
     }): string;
+    getChannel(params: {
+        channelID: id;
+    }): Promise<Channel>;
+    editChannel(params: {
+        channelID: id;
+        name?: string;
+        type?: ChannelType['key'];
+        position?: number | null;
+        topic?: string | null;
+        isNSFW?: boolean | null;
+        slowmode?: number | null;
+        bitrate?: number | null;
+        userLimit?: number | null;
+        permissions?: JSONPermission[];
+        parentID?: id;
+        reason?: string;
+    }): Promise<Channel>;
+    removeChannel(params: {
+        channelID: id;
+        reason?: string;
+    }): Promise<Channel>;
+    leaveDMChannel(params: {
+        channelID: id;
+    }): Promise<Channel>;
+    getMessages(params: {
+        channelID: id;
+        aroundID?: id;
+        beforeID?: id;
+        afterID?: id;
+        limit?: string;
+    }): Promise<Collection<unknown, unknown>>;
+    addMessage(params: {
+        channelID: id;
+        content?: string;
+        nonce?: string | number;
+        isTTS?: boolean;
+        embed?: JSONEmbed;
+        mentions?: JSONAllowedMentions;
+        file?: FileContents | FileContents[];
+    }): Promise<Message>;
+    getMessage(params: {
+        channelID: id;
+        messageID: id;
+    }): Promise<Message>;
+    editMessage(params: {
+        channelID: id;
+        messageID: id;
+        content?: string;
+        embed?: JSONEmbed;
+        flags?: number;
+    }): Promise<Message>;
+    removeMessage(params: {
+        channelID: id;
+        messageID: id;
+        reason?: string;
+    }): Promise<void>;
+    publishMessage(params: {
+        channelID: id;
+        messageID: id;
+    }): Promise<Message>;
+    removeReactions(params: {
+        channelID: id;
+        messageID: id;
+        emoji?: string;
+        userID?: id;
+        isAll?: boolean;
+    }): Promise<void>;
+    getReactionUsers(params: {
+        channelID: id;
+        messageID: id;
+        emoji: string;
+        beforeID: id;
+        afterID: id;
+        limit: number;
+    }): Promise<Collection<unknown, unknown>>;
+    addReaction(params: {
+        channelID: id;
+        messageID: id;
+        emoji: string;
+        userID?: id;
+    }): Promise<void>;
+    removeMessages(params: {
+        channelID: id;
+        messagesID: id[];
+        reason?: string;
+    }): Promise<void>;
+    editChannelPermissions(params: {
+        channelID: id;
+        overwriteID: id;
+        allow?: string;
+        deny?: string;
+        type?: PermissionType;
+        reason?: string;
+    }): Promise<void>;
+    removeChannelPermission(params: {
+        channelID: id;
+        overwriteID: id;
+        reason?: string;
+    }): Promise<void>;
+    getChannelInvites(params: {
+        channelID: id;
+    }): Promise<Collection<unknown, unknown>>;
+    addChannelInvite(params: {
+        channelID: id;
+        maxAge?: number;
+        maxUses?: number;
+        isTemporary?: boolean;
+        isUnique?: boolean;
+        targetUserID?: id;
+        targetUserType?: TargetUserType['key'];
+        reason?: string;
+    }): Promise<Invite>;
+    followNewsChannel(params: {
+        channelID: id;
+        webhookChannelID: id;
+    }): Promise<FollowedChannel>;
+    startTypingIndicator(params: {
+        channelID: id;
+    }): Promise<void>;
+    getPinnedMessages(params: {
+        channelID: id;
+    }): Promise<Collection<unknown, unknown>>;
+    addPinnedMessage(params: {
+        channelID: id;
+        messageID: id;
+        reason?: string;
+    }): Promise<void>;
+    removePinnedMessage(params: {
+        channelID: id;
+        messageID: id;
+        reason?: string;
+    }): Promise<void>;
+    addGroupDMUser(params: {
+        channelID: id;
+        userID: id;
+        accessToken: string;
+        nick: string;
+    }): Promise<void>;
+    removeGroupDMUser(params: {
+        channelID: id;
+        userID: id;
+    }): Promise<void>;
+    getChannelWebhooks(params: {
+        channelID: id;
+    }): Promise<Collection<unknown, unknown>>;
+    addChannelWebhook(params: {
+        channelID: id;
+        name: string;
+        avatar?: ImageData | null;
+        reason?: string;
+    }): Promise<Webhook>;
     getGateway(): Promise<Gateway>;
     getGatewayBot(): Promise<Gateway>;
-    getAppInformation(options: {
-        userID?: string;
-    }): Promise<App>;
+    addServer(params: {
+        name: string;
+        region?: string;
+        icon?: ImageData;
+        verificationLevel?: VerificationLevel['key'];
+        messageNotifications?: MessageNotificationLevel['key'];
+        explicitFilter?: ExplicitContentFilterLevel['key'];
+        roles?: JSONRole[];
+        channels?: PartialObject<JSONChannel>[];
+        afkChannelID?: id;
+        afkTimeout?: number;
+        systemChannelID?: id;
+    }): Promise<Server>;
+    getServer(params: {
+        serverID: id;
+        isWithCounts?: boolean;
+    }): Promise<Server>;
+    editServer(params: {
+        serverID: id;
+        name?: string;
+        region?: string | null;
+        icon?: ImageData | null;
+        verificationLevel?: VerificationLevel['key'] | null;
+        messageNotifications?: MessageNotificationLevel['key'] | null;
+        explicitFilter?: ExplicitContentFilterLevel['key'] | null;
+        afkChannelID?: id | null;
+        afkTimeout?: number;
+        ownerID?: id;
+        splash?: ImageData | null;
+        banner?: ImageData | null;
+        systemChannelID?: id | null;
+        rulesChannelID?: id | null;
+        publicUpdatesChannelID?: id | null;
+        preferredLocale?: DiscordLocales | null;
+        reason?: string;
+    }): Promise<Server>;
+    removeServer(params: {
+        serverID: id;
+    }): Promise<void>;
     getAuditLog(params: {
-        serverID: string;
-        userID?: string;
+        serverID: id;
+        userID?: id;
         actionType?: AuditLogEvent['key'];
-        before?: string;
+        beforeID?: id;
         limit?: number;
     }): Promise<AuditLog>;
-    getChannel(params: {
-        channelID: string;
-    }): Promise<Channel>;
-    updateChannel(options: {
-        channelID: string;
-        options: {
-            name?: string;
-            type?: number;
-            position?: number | null;
-            topic?: string | null;
-            nsfw?: boolean | null;
-            rateLimitPerUser?: number | null;
-            bitrate?: number | null;
-            userLimit?: number | null;
-            permissionOverwrites?: Permission[];
-            parentID?: string;
-        };
-        reason?: string;
-    }): Promise<Channel>;
-    deleteServerChannel(options: {
-        channelID: string;
-        reason?: string;
-    }): Promise<Channel>;
-    closeDMChannel(options: {
-        channelID: string;
-    }): Promise<Channel>;
-    getMessages(options: {
-        channelID: string;
-        options: {
-            around?: string;
-            before?: string;
-            after?: string;
-            limit?: string;
-        };
+    getBans(params: {
+        serverID: id;
     }): Promise<Collection<unknown, unknown>>;
-    getMessage(options: {
-        channelID: string;
-        messageID: string;
-    }): Promise<Message>;
-    createMessage(options: {
-        channelID: string;
-        options: {
-            content?: string;
-            nonce?: string | number;
-            tts?: boolean;
-            embed?: JSONEmbed;
-            payloadJSON?: string;
-            allowedMentions?: AllowedMentions;
-            file?: FileContents | FileContents[];
-        };
-    }): Promise<Message>;
-    crosspostMessage(options: {
-        channelID: string;
-        messageID: string;
-    }): Promise<Message>;
-    createReaction(options: {
-        channelID: string;
-        messageID: string;
-        userID?: string;
-        emoji: string;
+    getBan(params: {
+        serverID: id;
+        userID: id;
+    }): Promise<Ban>;
+    addBan(params: {
+        serverID: id;
+        userID: id;
+        days?: number;
+        reason?: string;
     }): Promise<void>;
-    deleteReaction(options: {
-        channelID: string;
-        messageID: string;
-        emoji?: string;
-        userID?: string;
-        all?: boolean;
+    removeBan(params: {
+        serverID: id;
+        userID: id;
+        reason?: string;
     }): Promise<void>;
-    getReactions(options: {
-        channelID: string;
-        messageID: string;
-        emoji: string;
-        options: {
-            before: string;
-            after: string;
-            limit: number;
-        };
+    getServerChannels(params: {
+        serverID: id;
     }): Promise<Collection<unknown, unknown>>;
-    updateMessage(options: {
-        channelID: string;
-        messageID: string;
-        options: {
-            content?: string;
-            embed?: JSONEmbed;
-            flags?: number;
-        };
-    }): Promise<Message>;
-    deleteMessage(options: {
-        channelID: string;
-        messageID: string;
-        reason?: string;
-    }): Promise<void>;
-    deleteBulkMessages(options: {
-        channelID: string;
-        options: {
-            messages: string[];
-        };
-        reason?: string;
-    }): Promise<void>;
-    updateChannelPermissions(options: {
-        channelID: string;
-        overwriteID: string;
-        options: {
-            allow?: string;
-            deny?: string;
-            type?: number;
-        };
-        reason?: string;
-    }): Promise<void>;
-    getChannelInvites(options: {
-        channelID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    createChannelInvite(options: {
-        channelID: string;
-        options: {
-            maxAge?: number;
-            maxUses?: number;
-            temporary?: boolean;
-            unique?: boolean;
-            targetUser?: string;
-            targetUserType?: number;
-        };
-        reason?: string;
-    }): Promise<Invite>;
-    deleteChannelPermission(options: {
-        channelID: string;
-        overwriteID: string;
-        reason?: string;
-    }): Promise<void>;
-    followNewsChannel(options: {
-        channelID: string;
-        options: {
-            webhookChannelID: string;
-        };
-    }): Promise<FollowedChannel>;
-    triggerTypingIndicator(options: {
-        channelID: string;
-    }): Promise<void>;
-    getPinnedMessages(options: {
-        channelID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    createPinnedChannelMessage(options: {
-        channelID: string;
-        messageID: string;
-        reason?: string;
-    }): Promise<void>;
-    deletePinnedChannelMessage(options: {
-        channelID: string;
-        messageID: string;
-        reason?: string;
-    }): Promise<void>;
-    createGroupDMRecipient(options: {
-        channelID: string;
-        userID: string;
-        options: {
-            accessToken: string;
-            nick: string;
-        };
-    }): Promise<void>;
-    deleteGroupDMRecipient(options: {
-        channelID: string;
-        userID: string;
-    }): Promise<void>;
-    getServerEmojis(options: {
-        serverID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    getServerEmoji(options: {
-        serverID: string;
-        emojiID: string;
-    }): Promise<Emoji>;
-    createServerEmoji(options: {
-        serverID: string;
-        options: {
-            name: string;
-            image: string;
-            roles?: string[];
-        };
-        reason?: string;
-    }): Promise<Emoji>;
-    updateServerEmoji(options: {
-        serverID: string;
-        emojiID: string;
-        options: {
-            name?: string;
-            image?: string;
-        };
-        reason?: string;
-    }): Promise<Emoji>;
-    deleteServerEmoji(options: {
-        serverID: string;
-        emojiID: string;
-        reason?: string;
-    }): Promise<void>;
-    createServer(options: {
-        options: {
-            name: string;
-            region?: string;
-            icon?: string;
-            verificationLevel?: number;
-            defaultMessageNotifications?: number;
-            explicitContentFilter?: number;
-            roles?: Role[];
-            channels?: PartialObject<Channel>[];
-            afkChannelID?: string;
-            afkTimeout?: number;
-            systemChannelID?: string;
-        };
-    }): Promise<Server>;
-    getServer(options: {
-        serverID: string;
-        options: {
-            withCounts?: boolean;
-        };
-    }): Promise<Server>;
-    getServerPreview(options: {
-        serverID: string;
-    }): Promise<ServerPreview>;
-    updateServer(options: {
-        serverID: string;
-        options: {
-            name?: string;
-            region?: string | null;
-            icon?: string | null;
-            verificationLevel?: number | null;
-            defaultMessageNotifications?: number | null;
-            explicitContentFilter?: number | null;
-            afkChannelID?: string | null;
-            afkTimeout?: number;
-            ownerID?: string;
-            splash?: string | null;
-            banner?: string | null;
-            systemChannelID?: string | null;
-            rulesChannelID?: string | null;
-            publicUpdatesChannelID?: string | null;
-            preferredLocale?: DiscordLocales | null;
-        };
-        reason?: string;
-    }): Promise<Server>;
-    deleteServer(options: {
-        serverID: string;
-    }): Promise<void>;
-    getServerChannels(options: {
-        serverID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    createServerChannel(options: {
-        serverID: string;
-        options: {
-            name: string;
-            type?: number;
-            position?: number | null;
-            topic?: string | null;
-            nsfw?: boolean | null;
-            rateLimitPerUser?: number | null;
-            bitrate?: number | null;
-            userLimit?: number | null;
-            permissionOverwrites?: Permission[];
-            parentID?: string;
-        };
+    addServerChannel(params: {
+        serverID: id;
+        name: string;
+        type?: ChannelType['key'];
+        topic?: string | null;
+        bitrate?: number | null;
+        userLimit?: number | null;
+        slowmode?: number | null;
+        position?: number | null;
+        permissions?: JSONPermission[];
+        parentID?: id;
+        isNSFW?: boolean | null;
         reason: string;
     }): Promise<Channel>;
-    updateServerChannelPositions(options: {
-        serverID: string;
-        options: {
-            id: string;
-            position: number | null;
-        };
+    editServerChannelPositions(params: {
+        serverID: id;
+        channelID: id;
+        position: number | null;
     }): Promise<void>;
-    getServerMember(options: {
-        serverID: string;
-        userID: string;
+    getEmojis(params: {
+        serverID: id;
+    }): Promise<Collection<unknown, unknown>>;
+    addEmoji(params: {
+        serverID: id;
+        name: string;
+        image: ImageData;
+        rolesID?: id[];
+        reason?: string;
+    }): Promise<Emoji>;
+    getEmoji(params: {
+        serverID: id;
+        emojiID: id;
+    }): Promise<Emoji>;
+    editEmoji(params: {
+        serverID: id;
+        emojiID: id;
+        name?: string;
+        rolesID?: id[] | null;
+        reason?: string;
+    }): Promise<Emoji>;
+    removeEmoji(params: {
+        serverID: id;
+        emojiID: id;
+        reason?: string;
+    }): Promise<void>;
+    getIntegrations(params: {
+        serverID: id;
+    }): Promise<Collection<unknown, unknown>>;
+    addIntegration(params: {
+        serverID: id;
+        type: string;
+        integrationID: id;
+        reason?: string;
+    }): Promise<void>;
+    editIntegration(params: {
+        serverID: id;
+        integrationID: id;
+        expireBehavior?: IntegrationExpireBehavior['key'] | null;
+        expireGracePeriod?: number | null;
+        isEmojis?: boolean | null;
+        reason?: string;
+    }): Promise<void>;
+    removeIntegration(params: {
+        serverID: id;
+        integrationID: id;
+        reason?: string;
+    }): Promise<void>;
+    syncIntegration(params: {
+        serverID: id;
+        integrationID: id;
+    }): Promise<void>;
+    getServerInvites(params: {
+        serverID: id;
+    }): Promise<Collection<unknown, unknown>>;
+    getMembers(params: {
+        serverID: id;
+        afterID?: id;
+        limit?: number;
+    }): Promise<Collection<unknown, unknown>>;
+    getMember(params: {
+        serverID: id;
+        userID: id;
     }): Promise<ServerMember>;
-    getServerMembers(options: {
-        serverID: string;
-        options: {
-            after?: string;
-            limit?: number;
-        };
-    }): Promise<Collection<unknown, unknown>>;
-    createServerMember(options: {
-        serverID: string;
-        userID: string;
-        options: {
-            accessToken: string;
-            nick?: number;
-            roles?: string[];
-            mute?: boolean;
-            deaf?: boolean;
-        };
+    addMember(params: {
+        serverID: id;
+        userID: id;
+        accessToken: string;
+        nick?: number;
+        rolesID?: id[];
+        isMute?: boolean;
+        isDeaf?: boolean;
     }): Promise<ServerMember>;
-    updateServerMember(options: {
-        serverID: string;
-        userID: string;
-        options: {
-            nick?: number;
-            roles?: string[];
-            mute?: boolean;
-            deaf?: boolean;
-            channelID?: string;
-        };
+    editMember(params: {
+        serverID: id;
+        userID: id;
+        nick?: string;
+        rolesID?: id[];
+        isMute?: boolean;
+        isDeaf?: boolean;
+        channelID?: id;
         reason?: string;
     }): Promise<void>;
-    updateUserNick(options: {
-        serverID: string;
-        userID?: string;
-        options: {
-            nick?: string | null;
-        };
-    }): Promise<void>;
-    createServerMemberRole(options: {
-        serverID: string;
-        userID: string;
-        roleID: string;
+    removeMember(params: {
+        serverID: id;
+        userID: id;
         reason?: string;
     }): Promise<void>;
-    deleteServerMemberRole(options: {
-        serverID: string;
-        userID: string;
-        roleID: string;
+    editUserNick(params: {
+        serverID: id;
+        userID?: id;
+        nick?: string | null;
+    }): Promise<void>;
+    addMemberRole(params: {
+        serverID: id;
+        userID: id;
+        roleID: id;
         reason?: string;
     }): Promise<void>;
-    deleteServerMember(options: {
-        serverID: string;
-        userID: string;
+    removeMemberRole(params: {
+        serverID: id;
+        userID: id;
+        roleID: id;
         reason?: string;
     }): Promise<void>;
-    getServerBans(options: {
-        serverID: string;
+    getServerPreview(params: {
+        serverID: id;
+    }): Promise<ServerPreview>;
+    getServerPrune(params: {
+        serverID: id;
+        days?: number;
+        includeRolesID?: id[];
+    }): Promise<void>;
+    startServerPrune(params: {
+        serverID: id;
+        days?: number;
+        computeCount?: boolean;
+        includeRolesID?: id[];
+        reason?: string;
+    }): Promise<void>;
+    getServerVoiceRegions(params: {
+        serverID: id;
     }): Promise<Collection<unknown, unknown>>;
-    getServerBan(options: {
-        serverID: string;
-        userID: string;
-    }): Promise<Ban>;
-    createServerBan(options: {
-        serverID: string;
-        userID: string;
-        options: {
-            deleteMessageDays?: number;
-            reason?: string;
-        };
-    }): Promise<void>;
-    deleteServerBan(options: {
-        serverID: string;
-        userID: string;
-        reason?: string;
-    }): Promise<void>;
-    getServerRoles(options: {
-        serverID: string;
+    getRoles(params: {
+        serverID: id;
     }): Promise<Collection<unknown, unknown>>;
-    createServerRole(options: {
-        serverID: string;
-        options: {
-            name?: string;
-            permissions?: string;
-            color?: number;
-            hoist?: boolean;
-            mentionable?: boolean;
-        };
+    addRole(params: {
+        serverID: id;
+        name?: string;
+        bitPermission?: string;
+        colorDec?: number;
+        isHoist?: boolean;
+        isMentionable?: boolean;
         reason?: string;
     }): Promise<Role>;
-    updateServerRolePositions(options: {
-        serverID: string;
-        options: {
-            id: string;
-            position?: number | null;
-        };
+    editRolePositions(params: {
+        serverID: id;
+        roleID: id;
+        position?: number | null;
     }): Promise<Collection<unknown, unknown>>;
-    updateServerRole(options: {
-        serverID: string;
-        roleID: string;
-        options: {
-            name?: string;
-            permissions?: string;
-            color?: number;
-            hoist?: boolean;
-            mentionable?: boolean;
-        };
+    editRole(params: {
+        serverID: id;
+        roleID: id;
+        name?: string;
+        bitPermission?: string;
+        colorDec?: number;
+        isHoist?: boolean;
+        isMentionable?: boolean;
         reason?: string;
     }): Promise<Role>;
-    deleteServerRole(options: {
-        serverID: string;
-        roleID: string;
+    removeRole(params: {
+        serverID: id;
+        roleID: id;
         reason?: string;
     }): Promise<void>;
-    getServerPruneCount(options: {
-        serverID: string;
-        options: {
-            days?: number;
-            includeRoles?: string[];
-        };
-    }): Promise<void>;
-    beginServerPrune(options: {
-        serverID: string;
-        options: {
-            days?: number;
-            computePruneCount?: boolean;
-            includeRoles?: string[];
-        };
-        reason?: string;
-    }): Promise<void>;
-    getServerVoiceRegions(options: {
-        serverID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    getServerInvites(options: {
-        serverID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    getServerIntegrations(options: {
-        serverID: string;
-        options: {
-            includeApps?: boolean;
-        };
-    }): Promise<Collection<unknown, unknown>>;
-    createServerIntegration(options: {
-        serverID: string;
-        options: {
-            type: string;
-            id: string;
-        };
-        reason?: string;
-    }): Promise<void>;
-    updateServerIntegration(options: {
-        serverID: string;
-        integrationID: string;
-        options: {
-            expireBehavior?: number;
-            expireGracePeriod?: number;
-            enableEmoticons?: boolean;
-        };
-        reason?: string;
-    }): Promise<void>;
-    deleteServerIntegration(options: {
-        serverID: string;
-        integrationID: string;
-        reason?: string;
-    }): Promise<void>;
-    syncServerIntegration(options: {
-        serverID: string;
-        integrationID: string;
-    }): Promise<void>;
-    getServerWidgetSettings(options: {
-        serverID: string;
-    }): Promise<ServerWidget>;
-    updateServerWidget(options: {
-        serverID: string;
-        options?: string;
-    }): Promise<ServerWidget>;
-    getServerWidget(options: {
-        serverID: string;
-    }): Promise<void>;
-    getServerVanityURL(options: {
-        serverID: string;
-    }): Promise<PartialObject<Invite>>;
-    getServerWidgetImage(options: {
-        serverID: string;
-        options: {
-            style?: WidgetStyle;
-        };
-    }): Promise<unknown>;
-    getInvite(options: {
-        inviteCode: string;
-        options: {
-            withCounts?: boolean;
-        };
-    }): Promise<Invite>;
-    deleteInvite(options: {
-        inviteCode: string;
-        reason?: string;
-    }): Promise<Invite>;
-    getTemplate(options: {
+    getServerTemplates(params: {
+        serverID: id;
+    }): Promise<Collection<string, Template>>;
+    addServerTemplate(params: {
+        serverID: id;
+        name: string;
+        description?: string | null;
+    }): Promise<Template>;
+    editServerTemplate(params: {
+        serverID: id;
+        templateCode: string;
+        name?: string;
+        description?: string | null;
+    }): Promise<Template>;
+    removeServerTemplate(params: {
+        serverID: id;
         templateCode: string;
     }): Promise<Template>;
-    createServerFromTemplate(options: {
+    syncServerTemplate(params: {
+        serverID: id;
         templateCode: string;
-        options: {
-            name: string;
-            icon?: string;
-        };
-    }): Promise<Server>;
-    getVoiceRegions(): Promise<Collection<unknown, unknown>>;
-    getUser(options: {
-        userID?: string;
-    }): Promise<User>;
-    updateUser(options: {
-        userID?: bigint;
-        options: {
-            username?: string;
-            avatar?: string;
-        };
-    }): Promise<User>;
-    getServers(options: {
-        userID?: string;
-        options: {
-            before?: string;
-            after?: string;
-            limit?: number;
-        };
-    }): Promise<Collection<bigint, PartialObject<Server>>>;
-    leaveServer(options: {
-        serverID: string;
-        userID?: string;
-    }): Promise<void>;
-    getDMs(options: {
-        userID?: string;
-    }): Promise<Collection<bigint, Channel>>;
-    createDM(options: {
-        userID?: string;
-        options: {
-            recipientID: string;
-        };
-    }): Promise<Channel>;
-    createGroupDM(options: {
-        userID?: string;
-        options: {
-            accessTokens: string[];
-            nicks: [[string, string]];
-        };
-    }): Promise<Channel>;
-    getConnections(options: {
-        userID?: string;
-    }): Promise<Collection<unknown, unknown>>;
-    createChannelWebhook(options: {
-        channelID: string;
-        options: {
-            name: string;
-            avatar?: string | null;
-        };
-        reason?: string;
-    }): Promise<Webhook>;
-    getChannelWebhooks(options: {
-        channelID: string;
-    }): Promise<Collection<unknown, unknown>>;
-    getServerWebhooks(options: {
-        serverID: string;
+    }): Promise<Template>;
+    getServerInvite(params: {
+        serverID: id;
+    }): Promise<PartialObject<Invite>>;
+    getServerWebhooks(params: {
+        serverID: id;
     }): Promise<Collection<bigint, Webhook>>;
-    getWebhook(options: {
-        webhookID: string;
+    getServerWidget(params: {
+        serverID: id;
+    }): Promise<ServerWidget>;
+    editServerWidget(params: {
+        serverID: id;
+        options?: string;
+    }): Promise<ServerWidget>;
+    getServerWidgetParams(params: {
+        serverID: id;
+    }): Promise<ServerWidgetParams>;
+    getServerWidgetImage(params: {
+        serverID: id;
+        style?: WidgetStyle;
+    }): Promise<unknown>;
+    getInvite(params: {
+        inviteCode: string;
+        isWithCounts?: boolean;
+    }): Promise<Invite>;
+    removeInvite(params: {
+        inviteCode: string;
+        reason?: string;
+    }): Promise<Invite>;
+    getOAuth2App(params: {
+        userID?: id;
+    }): Promise<App>;
+    getTemplate(params: {
+        templateCode: string;
+    }): Promise<Template>;
+    addServerFromTemplate(params: {
+        templateCode: string;
+        name: string;
+        icon?: ImageData;
+    }): Promise<Server>;
+    getUser(params: {
+        userID?: id;
+    }): Promise<User>;
+    editUser(params: {
+        userID?: id;
+        username?: string;
+        avatar?: ImageData;
+    }): Promise<User>;
+    getDMs(params: {
+        userID?: id;
+    }): Promise<Collection<bigint, Channel>>;
+    addDM(params: {
+        userID?: id;
+        recipientID: id;
+    }): Promise<Channel>;
+    addGroupDM(params: {
+        userID?: id;
+        accessTokens: string[];
+        nicks: [[id, string]];
+    }): Promise<Channel>;
+    getConnections(params: {
+        userID?: id;
+    }): Promise<Collection<unknown, unknown>>;
+    getServers(params: {
+        userID?: id;
+        beforeID?: id;
+        afterID?: id;
+        limit?: number;
+    }): Promise<Collection<bigint, PartialObject<Server>>>;
+    leaveServer(params: {
+        serverID: id;
+        userID?: id;
+    }): Promise<void>;
+    getVoiceRegions(): Promise<Collection<unknown, unknown>>;
+    getWebhook(params: {
+        webhookID: id;
         webhookToken?: string;
     }): Promise<Webhook>;
-    updateWebhook(options: {
-        webhookID: string;
+    editWebhook(params: {
+        webhookID: id;
         webhookToken?: string;
-        options: {
-            name: string;
-            avatar?: string | null;
-            channelID?: string;
-        };
+        name: string;
+        avatar?: ImageData | null;
+        channelID?: id;
         reason?: string;
     }): Promise<Webhook>;
-    deleteWebhook(options: {
-        webhookID: string;
+    removeWebhook(params: {
+        webhookID: id;
         webhookToken?: string;
         reason?: string;
     }): Promise<void>;
-    executeWebhook(options: {
-        webhookID: string;
+    executeWebhook(params: {
+        webhookID: id;
         webhookToken: string;
-        slack?: string;
-        github?: string;
-        options: {
-            wait?: boolean;
-            content?: string;
-            username?: string;
-            avatarURL?: string;
-            tts?: boolean;
-            embeds?: JSONEmbed[];
-            payloadJSON?: string;
-            allowedMentions?: AllowedMentions;
-            file?: FileContents | FileContents[];
-        };
+        isSlack?: boolean;
+        isGitHub?: boolean;
+        isWait?: boolean;
+        content?: string;
+        username?: string;
+        avatarURL?: string;
+        isTTS?: boolean;
+        embeds?: JSONEmbed[];
+        mentions?: JSONAllowedMentions;
+        file?: FileContents | FileContents[];
     }): Promise<void>;
 }
 export default Client;

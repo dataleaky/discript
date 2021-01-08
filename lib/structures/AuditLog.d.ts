@@ -8,7 +8,7 @@ import type { JSONIntegration } from './Integration';
 import Permission, { BitSet } from './Permission';
 import type { JSONPermission, PermissionType } from './Permission';
 import { Role } from './Server';
-import type { DefaultMessageNotificationLevel, ExplicitContentFilterLevel, JSONRole, MFALevel, VerificationLevel } from './Server';
+import type { ExplicitContentFilterLevel, JSONRole, MessageNotificationLevel, MFALevel, VerificationLevel } from './Server';
 import User from './User';
 import type { JSONUser } from './User';
 import Webhook from './Webhook';
@@ -61,10 +61,10 @@ declare const AuditLogChangeKeys: {
     readonly mfa_level: readonly ["mfaLevel", (element: MFALevel['key']) => 0 | 1];
     readonly verification_level: readonly ["verificationLevel", (element: VerificationLevel['key']) => 0 | 2 | 1 | 4 | 3];
     readonly explicit_content_filter: readonly ["explicitFilter", (element: ExplicitContentFilterLevel['key']) => 0 | 2 | 1];
-    readonly default_message_notifications: readonly ["defaultNotifications", (element: DefaultMessageNotificationLevel['key']) => 0 | 1];
+    readonly default_message_notifications: readonly ["defaultNotifications", (element: MessageNotificationLevel['key']) => 0 | 1];
     readonly vanity_url_code: readonly ["vanityCode", (element: string) => string];
-    readonly $add: readonly ["add", (element: PartialObject<JSONRole>[], client: ClientObject['client']) => Collection<bigint, PartialObject<Role>>];
-    readonly $remove: readonly ["remove", (element: PartialObject<JSONRole>[], client: ClientObject['client']) => Collection<bigint, PartialObject<Role>>];
+    readonly $add: readonly ["add", (element: PartialObject<JSONRole>[], client: ClientObject['_client']) => Collection<bigint, PartialObject<Role>>];
+    readonly $remove: readonly ["remove", (element: PartialObject<JSONRole>[], client: ClientObject['_client']) => Collection<bigint, PartialObject<Role>>];
     readonly prune_delete_days: readonly ["days", (element: number) => number];
     readonly widget_enabled: readonly ["isWidget", (element: boolean) => boolean];
     readonly widget_channel_id: readonly ["widgetChannelFlake", (element: string) => Flake];
@@ -101,8 +101,8 @@ declare const AuditLogChangeKeys: {
 };
 declare type AuditLogEvent = KeyValueParse<(typeof AuditLogEvents)>;
 declare type AuditLogChangeKey = KeyValueParse<(typeof AuditLogChangeKeys)>;
-declare type AuditLogChangeTypeJSON = string | MFALevel['key'] | VerificationLevel['key'] | ExplicitContentFilterLevel['key'] | DefaultMessageNotificationLevel['key'] | PartialObject<JSONRole>[] | number | boolean | JSONPermission[] | ChannelType['key'];
-declare type AuditLogChangeType = string | Flake | MFALevel['key'] | VerificationLevel['key'] | ExplicitContentFilterLevel['key'] | DefaultMessageNotificationLevel['key'] | Collection<bigint, PartialObject<Role>> | number | boolean | Collection<bigint, Permission> | BitSet | ChannelType['key'];
+declare type AuditLogChangeTypeJSON = string | MFALevel['key'] | VerificationLevel['key'] | ExplicitContentFilterLevel['key'] | MessageNotificationLevel['key'] | PartialObject<JSONRole>[] | number | boolean | JSONPermission[] | ChannelType['key'];
+declare type AuditLogChangeType = string | Flake | MFALevel['key'] | VerificationLevel['key'] | ExplicitContentFilterLevel['key'] | MessageNotificationLevel['key'] | Collection<bigint, PartialObject<Role>> | number | boolean | Collection<bigint, Permission> | BitSet | ChannelType['key'];
 interface JSONAuditLog {
     webhooks: JSONWebhook[];
     users: JSONUser[];
@@ -116,7 +116,7 @@ interface AuditLog {
     integrations: Collection<bigint, Integration>;
 }
 declare class AuditLog extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONAuditLog);
 }
 interface JSONAuditLogEntry {
@@ -138,7 +138,7 @@ interface AuditLogEntry extends Base {
     reason?: string;
 }
 declare class AuditLogEntry extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONAuditLogEntry);
     getActionType(): AuditLogEvent['value'] | null;
 }
@@ -177,7 +177,7 @@ interface AuditLogChange extends Base {
     key?: AuditLogChangeKey['value'][0];
 }
 declare class AuditLogChange extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONAuditLogChange);
 }
 export default AuditLog;

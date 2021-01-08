@@ -1,37 +1,35 @@
-declare type WeakenMap = new <K, V>() => {
-    [P in Exclude<keyof Map<K, V>, 'clear' | 'set' | 'delete' | 'forEach' | 'entries' | 'get' | 'has' | 'keys' | 'values'>]: Map<K, V>[P];
-};
+import type { WeakenMap } from './Types';
 declare const Collection_base: WeakenMap;
-declare class Collection<K, V> extends Collection_base<K, V> {
-    protected cacheV: V[] | null;
-    protected cacheK: K[] | null;
+export default class Collection<K, V> extends Collection_base<K, V> {
+    protected cacheValues: V[] | null;
+    protected cacheKeys: K[] | null;
     constructor();
     static toString(): string;
     static valueOf(): string;
     toString(): string;
     toJSON(): string;
-    toCache(): {
+    cache(): {
         keys: K[];
         values: V[];
     };
-    clear(): this;
-    set(key: K, value: V, force?: boolean): V;
-    delete(key: K): V;
-    forEach(callbackfn: (value: V, key: K, map: Collection<K, V>) => void, thisArg?: unknown): this;
-    entries(): IterableIterator<[K, V]>;
-    get(key: K): V;
-    has(key: K): boolean;
-    keys(): IterableIterator<K>;
-    values(): IterableIterator<V>;
     first(amount?: number): V | V[];
     last(amount?: number): V | V[];
     random(amount?: number): V | Collection<K, V> | undefined;
+    clear(): this;
+    set(key: K, value: V, force?: boolean): V;
+    delete(key: K): V;
+    get(key: K): V;
+    has(key: K): boolean;
+    entries(): IterableIterator<[K, V]>;
     every(callbackfn: (value: V, key: K, collection: Collection<K, V>) => boolean, thisArg?: unknown): boolean;
-    some(callbackfn: (value: V, key: K, collection: Collection<K, V>) => boolean, thisArg?: unknown): boolean;
     filter(callbackfn: (value: V, key: K, collection: Collection<K, V>) => boolean, thisArg?: unknown): Collection<K, V>;
     find(callbackfn: (value: V, key: K, collection: Collection<K, V>) => boolean, thisArg?: unknown): V | undefined;
+    forEach(callbackfn: (value: V, key: K, map: Collection<K, V>) => void, thisArg?: unknown): this;
+    keys(): IterableIterator<K>;
     map<T>(callbackfn: (value: V, key: K, collection: Collection<K, V>) => T, thisArg?: unknown): Collection<K, T>;
     reduce<T>(callbackfn: (accumulator: T | V, value: V, key?: K, collection?: Collection<K, V>) => T, initialValue?: T): V | T | undefined;
     reduceRight<T>(callbackfn: (accumulator: T | V, value: V, key?: K, collection?: Collection<K, V>) => T, initialValue?: T): V | T | undefined;
+    some(callbackfn: (value: V, key: K, collection: Collection<K, V>) => boolean, thisArg?: unknown): boolean;
+    values(): IterableIterator<V>;
 }
-export default Collection;
+export {};

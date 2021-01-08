@@ -49,7 +49,7 @@ interface Integration {
     app?: IntegrationApp;
 }
 declare class Integration extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get syncedDate(): Date | undefined;
     get role(): import("./Server").Role | undefined;
     constructor(data: ClientObject & JSONIntegration);
@@ -64,7 +64,7 @@ interface IntegrationAccount {
     name: string;
 }
 declare class IntegrationAccount extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get user(): User;
     constructor(data: ClientObject & JSONIntegrationAccount);
 }
@@ -85,7 +85,7 @@ interface IntegrationApp {
     bot?: User;
 }
 declare class IntegrationApp extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get app(): import("./App").default;
     constructor(data: ClientObject & JSONIntegrationApp);
     getIconURL(params: ImageParams): string | null;
@@ -113,11 +113,11 @@ interface Connection {
     visibilityType: VisibilityType['key'];
 }
 declare class Connection extends Base {
-    protected _client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     get user(): User;
     constructor(data: ClientObject & JSONConnection);
     getVisibilityType(): VisibilityType['value'] | null;
 }
 export default Integration;
 export { Connection };
-export type { JSONConnection, JSONIntegration };
+export type { IntegrationExpireBehavior, JSONConnection, JSONIntegration };

@@ -2,4 +2,4 @@
 
 **Now not stable!**
 
-Discord server: https://discord.gg/E2EN3B6
+Discord server: https://discord.gg/7DxWDhj8Um

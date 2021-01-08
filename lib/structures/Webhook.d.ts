@@ -8,7 +8,7 @@ declare const WebhookTypes: {
     readonly 2: "Channel Follower";
 };
 declare type WebhookType = KeyValueParse<(typeof WebhookTypes)>;
-interface JSONWebhook {
+export interface JSONWebhook {
     id: string;
     type: WebhookType['key'];
     guild_id?: string;
@@ -19,7 +19,7 @@ interface JSONWebhook {
     token?: string;
     application_id: string | null;
 }
-interface Webhook {
+export default interface Webhook {
     flake: Flake;
     type: number;
     serverFlake?: Flake;
@@ -30,8 +30,8 @@ interface Webhook {
     token?: string;
     appFlake: Flake | null;
 }
-declare class Webhook extends Base {
-    protected _client: ClientObject['client'];
+export default class Webhook extends Base {
+    protected _client: ClientObject['_client'];
     get server(): import("./Server").default | undefined;
     get channel(): import("./Channel").default;
     get app(): import("./App").default | null;
@@ -39,5 +39,4 @@ declare class Webhook extends Base {
     getAvatarURL(params: ImageParams): string | null;
     getType(): "Incoming" | "Channel Follower" | null;
 }
-export default Webhook;
-export type { JSONWebhook };
+export {};

@@ -31,7 +31,7 @@ interface Invite {
     roughMemberCount?: number;
 }
 declare class Invite extends Base {
-    protected client: ClientObject['client'];
+    protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONInvite);
     getTargetUserType(): "Stream" | null;
 }
@@ -54,4 +54,5 @@ declare class InviteMetadata extends Invite {
     constructor(data: ClientObject & JSONInviteMetadata);
 }
 export default Invite;
-export { InviteMetadata, JSONInvite, JSONInviteMetadata };
+export { InviteMetadata };
+export type { JSONInvite, JSONInviteMetadata, TargetUserType };
