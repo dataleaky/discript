@@ -14,7 +14,8 @@
     "@types/ws": "^7.4.0"
   },
   "scripts": {
-    "doc": "node test/docgen"
+    "doc": "node test/docgen",
+    "test": "node test/test"
   },
   "main": "index.js",
   "description": "JS/TS library for working with Discord API ",

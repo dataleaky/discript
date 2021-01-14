@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "lib": [],
+    "module": "CommonJS",
+    "outDir": "lib",
+    "target": "ESNext",
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "allowSyntheticDefaultImports": false,
+    "allowUmdGlobalAccess": false,
+    "moduleResolution": "Node",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
+    "resolveJsonModule": true,
+    "extendedDiagnostics": true
+  },
+  "include": [
+    "dev"
+  ]
+}
