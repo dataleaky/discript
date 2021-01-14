@@ -14,8 +14,8 @@ import Message from '../structures/Message';
 import type { JSONEmbed } from '../structures/Message';
 import type { JSONAllowedMentions } from '../structures/Message';
 import type { JSONPermission, PermissionType } from '../structures/Permission';
-import Server, { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, ServerWidgetParams, Template, WidgetStyle } from '../structures/Server';
-import type { ExplicitContentFilterLevel, JSONRole, MessageNotificationLevel, VerificationLevel } from '../structures/Server';
+import Server, { Ban, Emoji, MembershipScreening, Role, ServerMember, ServerPreview, ServerWidget, ServerWidgetParams, Template, WidgetStyle } from '../structures/Server';
+import type { ExplicitContentFilterLevel, JSONMembershipScreeningField, JSONRole, MessageNotificationLevel, VerificationLevel } from '../structures/Server';
 import User from '../structures/User';
 import Webhook from '../structures/Webhook';
 import type { EditPresence } from './EventHandler';
@@ -139,6 +139,7 @@ declare const DefaultEndpoints: {
     ServerMember: (base: string, serverID: id, userID: id) => string;
     ServerMemberNick: (base: string, serverID: id, userID: id) => string;
     ServerMemberRole: (base: string, serverID: id, userID: id, roleID: id) => string;
+    ServerMemberVerification: (base: string, serverID: id) => string;
     ServerPreview: (base: string, serverID: id) => string;
     ServerPrune: (base: string, serverID: id) => string;
     ServerRegions: (base: string, serverID: id) => string;
@@ -557,6 +558,15 @@ declare class Client extends Base {
         userID: id;
         reason?: string;
     }): Promise<void>;
+    getServerMembershipScreeningForm(params: {
+        serverID: id;
+    }): Promise<MembershipScreening>;
+    editServerMembershipScreeningForm(params: {
+        serverID: id;
+        isEnabled?: boolean;
+        formFields?: JSONMembershipScreeningField[];
+        description?: string;
+    }): Promise<MembershipScreening>;
     editUserNick(params: {
         serverID: id;
         userID?: id;

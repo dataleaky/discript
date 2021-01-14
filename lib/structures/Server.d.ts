@@ -45,8 +45,9 @@ declare type MFALevel = KeyValueParse<(typeof MFALevels)>;
 declare type VerificationLevel = KeyValueParse<(typeof VerificationLevels)>;
 declare type PremiumTier = KeyValueParse<(typeof PremiumTiers)>;
 declare type SystemChannelFlag = KeyValueParse<(typeof SystemChannelFlags)>;
-declare type ServerFeature = 'INVITE_SPLASH' | 'VIP_REGIONS' | 'VANITY_URL' | 'VERIFIED' | 'PARTNERED' | 'COMMUNITY' | 'COMMERCE' | 'NEWS' | 'DISCOVERABLE' | 'FEATURABLE' | 'ANIMATED_ICON' | 'BANNER' | 'WELCOME_SCREEN_ENABLED';
+declare type ServerFeature = 'INVITE_SPLASH' | 'VIP_REGIONS' | 'VANITY_URL' | 'VERIFIED' | 'PARTNERED' | 'COMMUNITY' | 'COMMERCE' | 'NEWS' | 'DISCOVERABLE' | 'FEATURABLE' | 'ANIMATED_ICON' | 'BANNER' | 'WELCOME_SCREEN_ENABLED' | 'MEMBER_VERIFICATION_GATE_ENABLED' | 'PREVIEW_ENABLED';
 declare type WidgetStyle = 'shield' | 'banner1' | 'banner2' | 'banner3' | 'banner4';
+declare type MembershipScreeningFieldType = 'TERMS';
 interface JSONServer {
     id: string;
     name: string;
@@ -93,6 +94,7 @@ interface JSONServer {
     max_video_channel_users?: number;
     approximate_member_count?: number;
     approximate_presence_count?: number;
+    welcome_screen?: JSONWelcomeScreen;
 }
 interface Server {
     flake: Flake;
@@ -140,6 +142,7 @@ interface Server {
     maxVideoChannelUsers?: number;
     roughMemberCount?: number;
     roughPresenceCount?: number;
+    welcomeScreen?: WelcomeScreen;
 }
 declare class Server extends Base {
     protected _client: ClientObject['_client'];
@@ -383,6 +386,64 @@ declare class ServerWidgetParams extends Base {
     protected _client: ClientObject['_client'];
     constructor(data: ClientObject & JSONServerWidgetParams);
 }
+interface JSONWelcomeScreen {
+    description: string | null;
+    welcome_channels: JSONWelcomeChannel[];
+}
+interface WelcomeScreen {
+    description: string | null;
+    channels: Collection<bigint, WelcomeChannel>;
+}
+declare class WelcomeScreen extends Base {
+    protected _client: ClientObject['_client'];
+    constructor(data: ClientObject & JSONWelcomeScreen);
+}
+interface JSONWelcomeChannel {
+    channel_id: string;
+    description: string;
+    emoji_id: string | null;
+    emoji_name: string | null;
+}
+interface WelcomeChannel {
+    flake: Flake;
+    description: string;
+    emojiFlake: Flake | null;
+    emojiName: string | null;
+}
+declare class WelcomeChannel extends Base {
+    protected _client: ClientObject['_client'];
+    get channel(): Channel;
+    get emoji(): Emoji | null;
+    constructor(data: ClientObject & JSONWelcomeChannel);
+}
+interface JSONMembershipScreening {
+    version: string;
+    form_fields: JSONMembershipScreeningField[];
+    description: string | null;
+}
+interface MembershipScreening {
+    editTime: number;
+    formFields: MembershipScreeningField[];
+    description: string | null;
+}
+declare class MembershipScreening {
+    constructor(data: JSONMembershipScreening);
+}
+interface JSONMembershipScreeningField {
+    field_type: MembershipScreeningFieldType;
+    label: string;
+    values?: string[];
+    required: boolean;
+}
+interface MembershipScreeningField {
+    fieldType: MembershipScreeningFieldType;
+    label: string;
+    values?: string[];
+    isRequired: boolean;
+}
+declare class MembershipScreeningField {
+    constructor(data: JSONMembershipScreeningField);
+}
 interface JSONTemplate {
     code: string;
     name: string;
@@ -418,5 +479,5 @@ declare class Template extends Base {
     constructor(data: ClientObject & JSONTemplate);
 }
 export default Server;
-export { Ban, Emoji, Role, ServerMember, ServerPreview, ServerWidget, ServerWidgetParams, Template, VoiceRegion, VoiceState };
-export type { ExplicitContentFilterLevel, JSONBan, JSONEmoji, JSONRole, JSONServer, JSONServerMember, JSONServerPreview, JSONServerWidget, JSONServerWidgetParams, JSONTemplate, JSONVoiceRegion, JSONVoiceState, MessageNotificationLevel, MFALevel, VerificationLevel, WidgetStyle };
+export { Ban, Emoji, MembershipScreening, Role, ServerMember, ServerPreview, ServerWidget, ServerWidgetParams, Template, VoiceRegion, VoiceState };
+export type { ExplicitContentFilterLevel, JSONBan, JSONEmoji, JSONMembershipScreening, JSONMembershipScreeningField, JSONRole, JSONServer, JSONServerMember, JSONServerPreview, JSONServerWidget, JSONServerWidgetParams, JSONTemplate, JSONVoiceRegion, JSONVoiceState, MessageNotificationLevel, MFALevel, VerificationLevel, WidgetStyle };

@@ -29,7 +29,7 @@ export interface EventListen {
     serverEmojisEdit: [serverID: string, emojis: Collection<bigint, Emoji>];
     serverIntegrationsEdit: [serverID: string];
     serverMemberAdd: [serverID: string, member: ServerMember];
-    serverMemberEdit: [serverID: string, user: User, rolesID: string[], joinedTime: number, nick: string | null | undefined, premiumTime: number | null | undefined];
+    serverMemberEdit: [serverID: string, user: User, rolesID: string[], joinedTime: number, nick: string | null | undefined, premiumTime: number | null | undefined, pending: boolean | undefined];
     serverMemberRemove: [serverID: string, user: User];
     serverRoleAdd: [serverID: string, role: Role];
     serverRoleEdit: [serverID: string, role: Role];

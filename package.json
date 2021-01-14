@@ -13,6 +13,9 @@
     "@types/node-fetch": "^2.5.7",
     "@types/ws": "^7.4.0"
   },
+  "scripts": {
+    "doc": "node test/docgen"
+  },
   "main": "index.js",
   "description": "JS/TS library for working with Discord API ",
   "repository": {

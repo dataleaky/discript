@@ -6,11 +6,6 @@ import type { ServerMember } from '../structures/Server';
 import type Client from './Client';
 import EventHandler from './EventHandler';
 import type { EventListen } from './EventHandler';
-declare const PackageData: {
-    readonly name: "discript";
-    readonly version: "1.0.0";
-    readonly homepage: "https://github.com/dataleaky/discript";
-};
 declare type HTTPMethod = 'GET' | 'PATCH' | 'POST' | 'PUT' | 'DELETE';
 declare type ClientEvent = KeyValueParse<EventListen>;
 interface ReasonObject {
@@ -45,5 +40,4 @@ interface FileContents {
 }
 declare type ImageData = string;
 export default RequestHandler;
-export { PackageData };
 export type { FileContents, ImageData };
