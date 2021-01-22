@@ -55,8 +55,8 @@ interface User {
 }
 declare class User extends Base {
     protected _client: ClientObject['_client'];
-    get mention(): string;
-    get fullName(): string;
+    get mention(): `<@${bigint}>`;
+    get fullName(): `${string}#${string}`;
     constructor(data: ClientObject & JSONUser);
     getAvatarURL(params: ImageParams): string | null;
     getFlags(): UserFlag['value'][] | null;

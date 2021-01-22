@@ -221,7 +221,7 @@ interface Role {
 }
 declare class Role extends Base {
     protected _client: ClientObject['_client'];
-    get mention(): string;
+    get mention(): `<@&${bigint}>`;
     constructor(data: ClientObject & JSONRole);
 }
 interface JSONRoleTags {
@@ -291,7 +291,7 @@ interface ServerMember {
 }
 declare class ServerMember extends Base {
     protected _client: ClientObject['_client'];
-    get mention(): string | undefined;
+    get mention(): `<@!${bigint}>` | undefined;
     get joinedDate(): Date;
     get premiumDate(): Date | null | undefined;
     get roles(): Collection<bigint, Role>;

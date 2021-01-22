@@ -94,7 +94,7 @@
 #### isManaged: boolean;
 #### isMentionable: boolean;
 #### tags?: RoleTags;
-#### mention: string;
+#### mention: `<@&${bigint}>`;
 #### constructor(data: ClientObject & JSONRole);
 
 # RoleTags extends Base 
@@ -132,7 +132,7 @@
 #### isMute: boolean;
 #### isPending?: boolean;
 #### bitPermission?: BitSet;
-#### mention: string | undefined;
+#### mention: `<@!${bigint}>` | undefined;
 #### joinedDate: Date;
 #### premiumDate: Date | null | undefined;
 #### roles: Collection<bigint, Role>;

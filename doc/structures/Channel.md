@@ -18,7 +18,7 @@
 #### appFlake?: Flake;
 #### parentFlake?: Flake | null;
 #### lastPinTime?: number | null;
-#### mention: string;
+#### mention: `<#${bigint}>`;
 #### lastPinDate: Date | null | undefined;
 #### server: import("./Server").default | undefined;
 #### lastMessage: import("./Server").Emoji | null | undefined;

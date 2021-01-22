@@ -4,9 +4,9 @@ export default class Collection<K, V> extends Collection_base<K, V> {
     protected cacheValues: V[] | null;
     protected cacheKeys: K[] | null;
     constructor();
-    static toString(): string;
-    static valueOf(): string;
-    toString(): string;
+    static toString(): `[class ${string}]`;
+    static valueOf(): `[class ${string}]`;
+    toString(): `class ${string} { [native code] }`;
     toJSON(): string;
     cache(): {
         keys: K[];

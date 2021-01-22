@@ -12,8 +12,8 @@
 #### email?: string | null;
 #### flags?: number;
 #### premiumType?: PremiumType['key'];
-#### mention: string;
-#### fullName: string;
+#### mention: `<@${bigint}>`;
+#### fullName: `${string}#${string}`;
 #### constructor(data: ClientObject & JSONUser);
 #### getAvatarURL(params: ImageParams): string | null;
 #### getFlags(): UserFlag['value'][] | null;

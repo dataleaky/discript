@@ -58,7 +58,7 @@ interface Channel {
 }
 declare class Channel extends Base {
     protected _client: ClientObject['_client'];
-    get mention(): string;
+    get mention(): `<#${bigint}>`;
     get lastPinDate(): Date | null | undefined;
     get server(): import("./Server").default | undefined;
     get lastMessage(): import("./Server").Emoji | null | undefined;

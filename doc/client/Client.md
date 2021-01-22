@@ -69,7 +69,7 @@
 }): string;
 #### getDefaultUserAvatarURL(params: {
     tag: string;
-}): string;
+}): `${string}/embed/avatars/${string}.png`;
 #### getEmojiURL(params: {
     emojiID: id;
     animated: boolean;
@@ -414,7 +414,7 @@
     isDeaf?: boolean;
     channelID?: id;
     reason?: string;
-}): Promise<void>;
+}): Promise<ServerMember>;
 #### removeMember(params: {
     serverID: id;
     userID: id;
@@ -546,9 +546,17 @@
     inviteCode: string;
     reason?: string;
 }): Promise<Invite>;
-#### getOAuth2App(params: {
+#### getApp(params: {
     userID?: id;
 }): Promise<App>;
+#### getAuthorization(params: {
+    userID?: id;
+}): Promise<{
+    app: App;
+    expires: number;
+    scopes: string[];
+    user: User | undefined;
+}>;
 #### getTemplate(params: {
     templateCode: string;
 }): Promise<Template>;

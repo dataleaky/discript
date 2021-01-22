@@ -1,7 +1,7 @@
 export default abstract class Base {
     constructor();
-    static toString(): string;
-    static valueOf(): string;
-    toString(): string;
+    static toString(): `[class ${string}]`;
+    static valueOf(): `[class ${string}]`;
+    toString(): `class ${string} { [native code] }`;
     toJSON(): string;
 }
